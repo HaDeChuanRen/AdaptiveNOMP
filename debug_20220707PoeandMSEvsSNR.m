@@ -94,9 +94,9 @@ for mc = 1 : MC
         %     continue;
         % end
 
-        % if (mc ~= 37) || (sp_idx ~= 1)
-        %     continue;
-        % end
+        if (mc ~= 3077) || (sp_idx ~= 3)
+            continue;
+        end
 
         % NOMP P_oe = 0.01
         [omegaList_tau_001Poe, gainList_tau_001Poe, ~] = MNOMP(y, S, tau_NOMP_001Poe);
