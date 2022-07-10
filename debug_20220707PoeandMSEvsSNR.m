@@ -94,7 +94,7 @@ for mc = 1 : MC
         %     continue;
         % end
 
-        if (mc ~= 3077) || (sp_idx ~= 3)
+        if (mc ~= 3920) || (sp_idx ~= 2)
             continue;
         end
 
