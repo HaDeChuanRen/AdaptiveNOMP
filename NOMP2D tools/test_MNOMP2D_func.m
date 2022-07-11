@@ -32,9 +32,9 @@ N_max = ceil(tau_max * Fs);
 K_targets = 4;
 sigma_n = 1;
 % SNR_all = 5 * rand(1, K_targets) + 1;
-SNR_dB = 0;
+SNR_dB = 16;
 % gain_alltargets = randn(K_targets, 1) + 1j * randn(K_targets, 1);
-gain_allK = sqrt(10 .^ (SNR_dB / 10) * NM_num * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(1, K_targets));
+gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(1, K_targets));
 % gain_allK = zeros(1, K_targets);
 
 % set the variable to be estimated and get the corresponding angular frequency
@@ -87,8 +87,12 @@ K_max = K_targets + 2;
 % [omega_list, gain_list, y_residue_matrix, overthr_alldB] = MNOMP2D_CA_alpha_serial(y_matrix, gamma_cfar, gamma_mnomp, guard_training_size, alpha_set, K_max);
 
 p_fa_CFAR = 1e-2 / (Nx * My);
+p_oe = 1e-2;
+N_r = (2 * training_n + 1) * (2 * training_m + 1) - (2 * guard_n + 1) * (2 * guard_m + 1);
 
-[omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFAR(y_matrix, p_fa_CFAR, guard_training_size, K_max);
+alpha_hat = alpha_Poe(p_oe, NM_num, N_r);
+[omegaList, gainList, y_residue_matrix, Threshold_collect] =...
+NOMP2D_CFAR(y_matrix, alpha_hat, guard_training_size, K_max);
 
 
 

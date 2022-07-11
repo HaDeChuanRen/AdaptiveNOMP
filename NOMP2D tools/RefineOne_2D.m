@@ -18,7 +18,7 @@ function [y_residue_matrix, omega_hat, ghat] = RefineOne_2D(y_matrix, omega_est,
 
     x1diff_vec = 1j * ant_idx_Nx .* xhat_vec;
     y1diff_vec = 1j * ant_idx_My .* yhat_vec;
-    
+
     % get the gradient of vector a
     ax1diff_vec = kron(yhat_vec, x1diff_vec);
     ay1diff_vec = kron(y1diff_vec, xhat_vec);
@@ -32,7 +32,7 @@ function [y_residue_matrix, omega_hat, ghat] = RefineOne_2D(y_matrix, omega_est,
     ay2diff_vec = kron(y2diff_vec, xhat_vec);
     axy2diff_vec = kron(y1diff_vec, x1diff_vec);
     Hessian_S = zeros(2, 2);
-    
+
     Hessian_S(1, 1) = - 2 * real(ghat' * ax2diff_vec' * y_vector_add);
     Hessian_S(2, 2) = - 2 * real(ghat' * ay2diff_vec' * y_vector_add);
     Hessian_S(1, 2) = - 2 * real(ghat' * axy2diff_vec' * y_vector_add);

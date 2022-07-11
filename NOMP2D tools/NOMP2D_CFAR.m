@@ -1,9 +1,8 @@
-function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFAR(y_matrix, p_fa_CFAR, train_guard_cell, K_max, CFAR_method, overSamplingRate, R_s, R_c)
+function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSamplingRate, R_s, R_c)
 %NOMP2D_CFAR 此处显示有关此函数的摘要
 %   此处显示详细说明
     if ~exist('CFAR_method', 'var'), CFAR_method = 'CA';
     elseif isempty(CFAR_method), CFAR_method = 'CA'; end
-
 
     if ~exist('overSamplingRate','var'), overSamplingRate = [4; 4];
     elseif isempty(overSamplingRate), overSamplingRate = [4; 4]; end
@@ -66,13 +65,13 @@ function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFA
                 [omegaList_temp, ~, ~] = RefineAll_2D(y_r_det_sq, omegaList(tar_set_diff, :), gainList(tar_set_diff,:), R_s, R_c);
                 [~, y_test, ~] = LeastSquares_2D(y_matrix, omegaList_temp);
 
-                [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, train_guard_cell, p_fa_CFAR, overSamplingRate, CFAR_method);
+                [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, train_guard_cell, alpha_set, overSamplingRate);
                 % alpha_hat(kidx) = res_inf_normSq_rot / sigma_hat;
                 Tarray_judgement(kidx) = T_judgement;
                 Threshold_collect(kidx) = Threshold_CUT;
             end
         else
-            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, p_fa_CFAR, overSamplingRate, CFAR_method);
+            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, alpha_set, overSamplingRate);
             % alpha_hat0 = res_inf_normSq_rot / sigma_hat;
             % Tarray_judgement = alpha_hat0/tau-1;
             Tarray_judgement = T_judgement;
@@ -94,9 +93,9 @@ function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFA
             [omegaList, gainList, ~] = RefineAll_2D(y_residue_matrix, omegaList, gainList, R_s, R_c);
             [gainList, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omegaList);
         else
-            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, p_fa_CFAR, overSamplingRate, CFAR_method);
+            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, alpha_set, overSamplingRate);
             % alpha_hat0 = res_inf_normSq_rot / sigma_hat;
-            % Tarray_judgement0 = alpha_hat0/tau-1;  
+            % Tarray_judgement0 = alpha_hat0/tau-1;
             if (T_judgement > 0) && (Khat < K_max)
                 % detect
                 [omega_new, gain_new, y_residue_matrix] = DetectNew_2D(y_residue_matrix, overSamplingRate);
@@ -107,13 +106,13 @@ function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFA
                 gainList  = [gainList; gain_new];
                 % Threshold_collect = [Threshold_collect; Threshold_CUT];
                 Khat = Khat + 1;
-    
+
                 % refine all frequencies detected so far
                 % can be interpreted as a search for better frequency supports
                 [omegaList, gainList, y_residue_matrix] = RefineAll_2D(y_residue_matrix, omegaList, gainList, R_s, R_c);
-                % refineAll only uses refineOne to tweak parameters and the energy 
+                % refineAll only uses refineOne to tweak parameters and the energy
                 % in the residual measurements y_r can only decrease as a result
-    
+
                 % Solve least squares for the dictionary set [Ax(omega)] omega in 
                 % omegaList
                 [gainList, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omegaList);
@@ -124,15 +123,13 @@ function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFA
     
     end
 
-    if ~isempty(omegaList) 
+    if ~isempty(omegaList)
         gainList = bsxfun(@times, gainList, exp(1j * (ant_idx_Nx(1) * omegaList(:, 1) + ant_idx_My(1) * omegaList(:, 2))));
 
         % gainList = gainList .* exp(1j*sampledManifold.ant_idx(1)*omegaList);
         omegaList =  wrapTo2Pi(omegaList);
     end
 
-
-    
 
 end
 
