@@ -9,14 +9,14 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 5000;
+MC = 5;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
 
-K = 16;
-K_max = 32;
-SNR_min_all = 14 : 1 : 20;
+K = 8;
+K_max = 2 * K;
+SNR_min_all = 16 : 2 : 24;
 Num_SNR = length(SNR_min_all);
 SNR_delta = 0;
 guard_size = 8;
@@ -41,7 +41,15 @@ omega_true = zeros(K, 1);
 omega_min = 2.5 * 2 * pi / N;
 % normal measurements
 % M = N; % number of measurements = N
-S = eye(N);
+% S = eye(N);
+
+M = round(N / 2);
+% type of measurement matrix
+measure_type = 'cmplx_bernoulli';
+% windowing weights
+% options 'all_ones' (default), 'hamming' and 'hann'
+window_type = 'all_ones';
+S = generateMeasMat(N, M, measure_type, window_type);
 
 Miss_tau_001Poe = zeros(MC, Num_SNR);
 False_tau_001Poe = zeros(MC, Num_SNR);
@@ -75,7 +83,7 @@ for mc = 1 : MC
         omega_true(k) = th;
     end
     omega_true = wrapTo2Pi(omega_true);
-    noise = sqrt(sigma_n / 2) * (randn(N, T) + 1j*randn(N, T));
+    noise = sqrt(sigma_n / 2) * (randn(M, T) + 1j*randn(M, T));
     gain_phi = exp(1j*2*pi*rand(K,T));
 
     for sp_idx = 1 : Num_SNR

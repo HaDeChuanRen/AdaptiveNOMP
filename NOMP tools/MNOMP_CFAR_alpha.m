@@ -24,7 +24,7 @@ function [omegaList, gainList, residueList, Threshold_collect] = MNOMP_CFAR_alph
 %        just the identity matrix
 %    alpha_set - the multiplu factor of CFAR method, which is calculated
 %        by $\P_{\rm OE}$ and decided by CFAR method
-%    training_cells: number of training cells
+%    training_cells: number of training cells (N_r)
 %    K_max - upper limit of the target number in the scene
 %    CFAR_method (optional): method of CFAR, which can be input as
 %        'CA' or 'OS'
