@@ -41,7 +41,7 @@ end
 Allidx_set = 1 : N;
 Target_idx = round(omegaList_new * N / (2 * pi) + 1);
 % Target_set = [Target_idx-2;Target_idx-1;Target_idx;Target_idx+1;Target_idx+2];
-Targetidx_collect = [Target_idx - 1; Target_idx; Target_idx + 1];
+% Targetidx_collect = [Target_idx - 1; Target_idx; Target_idx + 1];
 % Targetidx_collect = setdiff(Targetidx_collect, [-N : 0, (N + 1) : (2 * N)]);
 
 prob_ind = prob(1 : OSR : end);
@@ -51,7 +51,8 @@ guardidx_set = (peak_idx - guard_cells) : (peak_idx + guard_cells);
 
 
 % select the taining cells and calculate the estimation of noise variance
-tempidx_set = setdiff(Allidx_set, Targetidx_collect);
+% tempidx_set = setdiff(Allidx_set, Targetidx_collect);
+tempidx_set = setdiff(Allidx_set, Target_idx);
 noiseidx_set = setdiff(tempidx_set, guardidx_set);
 
 [~, peakidx_new] = min(abs(noiseidx_set - peak_idx));
