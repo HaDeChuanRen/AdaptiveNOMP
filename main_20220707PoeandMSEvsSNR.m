@@ -23,7 +23,7 @@ guard_size = 8;
 training_size = 50;
 
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
-T = 1;
+S_snap = 10;
 P_oe001 = 0.01;
 P_oe005 = 0.05;
 
@@ -33,23 +33,23 @@ CFAR_method = 'CA';
 
 gamma_oversamping = 4;
 
-tau_NOMP_001Poe = sigma_n * chi2inv((1 - P_oe001) ^ (1 / N), 2 * T) / 2;
-alpha_CA25_001Poe = alpha_Poe(P_oe001, N, N_r50);
+tau_NOMP_001Poe = sigma_n * chi2inv((1 - P_oe001) ^ (1 / N), 2 * S_snap) / 2;
+alpha_CA25_001Poe = alpha_PoebyS(P_oe001, N, N_r50, S_snap);
 
 
 omega_true = zeros(K, 1);
 omega_min = 2.5 * 2 * pi / N;
 % normal measurements
-% M = N; % number of measurements = N
-% S = eye(N);
+M = N; % number of measurements = N
+S_matrix = eye(N);
 
-M = round(N / 2);
-% type of measurement matrix
-measure_type = 'cmplx_bernoulli';
-% windowing weights
-% options 'all_ones' (default), 'hamming' and 'hann'
-window_type = 'all_ones';
-S = generateMeasMat(N, M, measure_type, window_type);
+% M = round(N / 2);
+% % type of measurement matrix
+% measure_type = 'cmplx_bernoulli';
+% % windowing weights
+% % options 'all_ones' (default), 'hamming' and 'hann'
+% window_type = 'all_ones';
+% S = generateMeasMat(N, M, measure_type, window_type);
 
 Miss_tau_001Poe = zeros(MC, Num_SNR);
 False_tau_001Poe = zeros(MC, Num_SNR);
@@ -83,8 +83,8 @@ for mc = 1 : MC
         omega_true(k) = th;
     end
     omega_true = wrapTo2Pi(omega_true);
-    noise = sqrt(sigma_n / 2) * (randn(M, T) + 1j*randn(M, T));
-    gain_phi = exp(1j*2*pi*rand(K,T));
+    noise = sqrt(sigma_n / 2) * (randn(M, S_snap) + 1j*randn(M, S_snap));
+    gain_phi = exp(1j * 2 * pi * rand(K, S_snap));
 
     for sp_idx = 1 : Num_SNR
         SNR_min = SNR_min_all(sp_idx);
@@ -95,7 +95,7 @@ for mc = 1 : MC
         gain_true = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR / 20)), gain_phi);  % K*T
         % original signal
         y_full = exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_true;
-        y_noisy = S * y_full + noise;
+        y_noisy = S_matrix * y_full + noise;
         y = y_noisy;
 
         % if (mc ~= 434) || (sp_idx ~= 9)
@@ -107,7 +107,7 @@ for mc = 1 : MC
         % end
 
         % NOMP P_oe = 0.01
-        [omegaList_tau_001Poe, gainList_tau_001Poe, ~] = MNOMP(y, S, tau_NOMP_001Poe);
+        [omegaList_tau_001Poe, gainList_tau_001Poe, ~] = MNOMP(y, S_matrix, tau_NOMP_001Poe);
         results_struct_tau_001Poe = analysis_result(omega_true, gain_true,...
         omegaList_tau_001Poe, gainList_tau_001Poe, N, gamma_oversamping);
         False_tau_001Poe(mc, sp_idx) = results_struct_tau_001Poe.False_Eve;
@@ -120,7 +120,7 @@ for mc = 1 : MC
 
         % NOMP-CA P_oe = 0.01 N_r = 50
         [omegaList_CA25_001Poe, gainList_CA25_001Poe, ~] =...
-        MNOMP_CFAR_alpha(y, S, alpha_CA25_001Poe, training_size, K_max, CFAR_method);
+        MNOMP_CFAR_alpha(y, S_matrix, alpha_CA25_001Poe, training_size, K_max, CFAR_method);
         results_struct_CA25_001Poe = analysis_result(omega_true, gain_true,...
         omegaList_CA25_001Poe, gainList_CA25_001Poe, N, gamma_oversamping);
         False_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.False_Eve;
@@ -217,14 +217,14 @@ xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
 ylabel('RMSE($\|\hat{\mathbf{y}} - \mathbf{y}\|$) (dB)','Interpreter','latex','Fontsize',fsz)
 
 
-
-filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
-save(filename_now, 'N', 'P_oe001', 'K', 'SNR_min_all',  'CRB_omega',...
-'False_tau_001Poe', 'Overest_tau_001Poe', 'Detect_tau_001Poe',...
-'Equal_tau_001Poe', 'Miss_tau_001Poe', 'Error_ave_tau_001Poe', 'reconErr_tau_001Poe',...
-'False_CA25_001Poe', 'Overest_CA25_001Poe', 'Detect_CA25_001Poe',...
-'Equal_CA25_001Poe', 'Miss_CA25_001Poe', 'Error_ave_CA25_001Poe', 'reconErr_CA25_001Poe');
-
+if MC > 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
+    save(filename_now, 'N', 'P_oe001', 'K', 'SNR_min_all',  'CRB_omega',...
+    'False_tau_001Poe', 'Overest_tau_001Poe', 'Detect_tau_001Poe',...
+    'Equal_tau_001Poe', 'Miss_tau_001Poe', 'Error_ave_tau_001Poe', 'reconErr_tau_001Poe',...
+    'False_CA25_001Poe', 'Overest_CA25_001Poe', 'Detect_CA25_001Poe',...
+    'Equal_CA25_001Poe', 'Miss_CA25_001Poe', 'Error_ave_CA25_001Poe', 'reconErr_CA25_001Poe');
+end
 
 
 

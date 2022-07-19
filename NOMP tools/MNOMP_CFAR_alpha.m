@@ -139,7 +139,7 @@ while true
     Tarray_judgement = zeros(Khat, 1);
     Threshold_collect = zeros(Khat, 1);
     omegaList_save = zeros(Khat - 1, Khat);
-    gainList_save = zeros(Khat - 1, Khat);
+    gainList_save = zeros(Khat - 1, T, Khat);
     tar_set = 1 : Khat;
 
     % calculate the criterion values and thresholds of all targets
@@ -173,7 +173,7 @@ while true
             Tarray_judgement(kidx) = T_judgement;
             Threshold_collect(kidx) = Threshold_CUT;
             omegaList_save(:, kidx) = omegaList_new;
-            gainList_save(:, kidx) = gainList_new;
+            gainList_save(:, :, kidx) = gainList_new;
 
         end
     else
@@ -193,7 +193,7 @@ while true
         % target will be deleted from the result list by using the
         % correspoding new omega list
         omegaList = omegaList_save(:, ktar_idx);
-        gainList = gainList_save(:, ktar_idx);
+        gainList = gainList_save(:, :, ktar_idx);
         Khat = Khat - 1;
 
         if Khat == 0

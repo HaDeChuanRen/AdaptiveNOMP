@@ -1,4 +1,4 @@
-% last updated date: 2022.7.13
+% last updated date: 2022.7.18
 % 2022.6.25: 1. compare the Poe performance of NOMP and CA-NOMP
 
 clc; clear; close all;
@@ -52,6 +52,9 @@ for grid_alpha = 1:N_alpha_g
 end
 Num_Poe = length(Poe_all);
 alpha_CA = zeros(length(Poe_all),1);
+
+figure(555);
+plot(alpha_grid, 1 - res);
 
 oneminusPOE = 1 - Poe_all;
 for idx = 1:length(Poe_all)
