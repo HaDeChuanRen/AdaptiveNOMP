@@ -1,4 +1,5 @@
-function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSamplingRate, R_s, R_c)
+function [omegaList, gainList, y_residue_matrix, Threshold_collect] =...
+NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSamplingRate, R_s, R_c)
 %NOMP2D_CFAR 此处显示有关此函数的摘要
 %   此处显示详细说明
     if ~exist('CFAR_method', 'var'), CFAR_method = 'CA';
@@ -35,11 +36,11 @@ function [omegaList, gainList, y_residue_matrix, Threshold_collect] = NOMP2D_CFA
         omegaList(K_est, :) = omega_k;
         gainList(K_est) = gain_k;
 
-        [omega_est, gain_est, y_residue_matrix] = RefineAll_2D(y_residue_matrix, omegaList(1 : K_est, :), gainList(1 : K_est), R_s, R_c);
+        [omega_est, ~, ~] = RefineAll_2D(y_residue_matrix, omegaList(1 : K_est, :), gainList(1 : K_est), R_s, R_c);
         [gain_est, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omega_est);
         omegaList(1 : K_est, :) = omega_est;
         gainList(1 : K_est) = gain_est;
-        
+
         % [omegaList, gainList, y_residue_matrix] = refineall_1D_serial(y_residue_matrix, omegaList, gainList, R_s, R_c);
         % [gainList, y_residue_matrix, A_all_omega] = LeastSquares_1D(y_matrix, omegaList, ant_idx);
     end

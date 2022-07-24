@@ -6,7 +6,7 @@ function alpha_hat = alpha_PoebyS(P_oe, N, N_r, S_snap)
     elseif isempty(S_snap),    S_snap = 1; end
 
     alpha_min = 1;
-    alpha_max = 100;
+    alpha_max = 20;
     accuracy_result = 1e-12;
 
     if S_snap == 1
@@ -35,7 +35,7 @@ function alpha_hat = alpha_PoebyS(P_oe, N, N_r, S_snap)
             exp(N * log(1 - sum(exp(- Tvar + k_seq .* log(Tvar) - ln_factorialS))) + ...
             (S_snap * N_r - 1) * log(N_r * Tvar / alpha_set) - ...
             N_r * Tvar / alpha_set - sum(log(1 : (S_snap * N_r - 1))));
-            int_result = integral(fun_Poe, 0, Inf);
+            int_result = integral(fun_Poe, 0, 5e3);
             delta_result = 1 - int_result - P_oe;
             if delta_result > 0
                 alpha_min = alpha_set;

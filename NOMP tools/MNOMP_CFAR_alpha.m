@@ -1,4 +1,6 @@
-function [omegaList, gainList, residueList, Threshold_collect] = MNOMP_CFAR_alpha(y, S, alpha_set, training_cells, K_max, CFAR_method, overSamplingRate, R_s, R_c)
+function [omegaList, gainList, residueList, Threshold_collect] =...
+MNOMP_CFAR_alpha(y, S, alpha_set, training_cells, K_max, CFAR_method,...
+overSamplingRate, R_s, R_c)
 % last refinement date: 2022.6.30
 % 2022.6.30: 1. separate the function file into different parts
 % 2022.6.26: 1. change the parameter training_gurad_cell as
@@ -233,13 +235,13 @@ while true
             % can be interpreted as a search for better frequency supports
             [omegaList, ~, ~] = refineAll(y_r, omegaList,...
                 gainList, S, sampledManifold.ant_idx, R_s, R_c);
-            % refineAll only uses refineOne to tweak parameters and the energy
-            % in the residual measurements y_r can only decrease as a result
+            % refineAll only uses refineOne to weak the energy in the
+            % residual measurements y_r which can only decrease as a result
 
-            % Solve least squares for the dictionary set [Ax(omega)] omega in
-            % omegaList
-            [omegaList, gainList, y_r, A] = solveLeastSquares(y , omegaList, ...
-                S, sampledManifold.ant_idx);
+            % Solve least squares for the dictionary set [Ax(omega)] omega 
+            % in omegaList
+            [omegaList, gainList, y_r, A] = solveLeastSquares(y,...
+                omegaList, S, sampledManifold.ant_idx);
         else
             break;
         end
@@ -251,7 +253,8 @@ end
 
 % revert to standard notion of sinusoid:
 %           exp(1j*(0:(N-1))'*omega)/sqrt(N)
-gainList = bsxfun(@times,gainList,exp(1j*sampledManifold.ant_idx(1)*omegaList));
+gainList = bsxfun(@times, gainList,...
+exp(1j*sampledManifold.ant_idx(1)*omegaList));
 
 % gainList = gainList .* exp(1j*sampledManifold.ant_idx(1)*omegaList);
 omegaList = wrap_2pi(omegaList);

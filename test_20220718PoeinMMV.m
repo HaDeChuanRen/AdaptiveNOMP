@@ -7,7 +7,7 @@ N_r = 50;
 
 alpha_all = (1 : 0.01 : 15)';
 S_all = [10, 50, 100];
-S_max = 2000;
+% S_max = 2000;
 T_var = 1 : 5000;
 % S_all = 1;
 length_alpha = length(alpha_all);
@@ -98,7 +98,7 @@ ylim([0 1])
 
 length_Poe = length(Poe_all);
 alpha_cal = zeros(length_Poe, 1);
-S = 10;
+S = 50;
 for p_idx = 1 : length_Poe
     Poe = Poe_all(p_idx);
     alpha_cal(p_idx) = alpha_PoebyS(Poe, N, N_r, S);
@@ -107,7 +107,7 @@ end
 figure(2);
 plot(alpha_cal, Poe_all, 'Linewidth', lw, 'Markersize', msz)
 hold on;
-plot(alpha_all, 1- Poe_alpha(:, 1), 'Linewidth', lw, 'Markersize', msz);
+plot(alpha_all, 1- Poe_alpha(:, 2), 'Linewidth', lw, 'Markersize', msz);
 
 
 
