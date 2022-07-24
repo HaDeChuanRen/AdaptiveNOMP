@@ -9,14 +9,14 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 5;
+MC = 5000;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
 
 K = 8;
 K_max = 2 * K;
-SNR_min_all = 16 : 2 : 24;
+SNR_min_all = 2 : 1 : 12;
 Num_SNR = length(SNR_min_all);
 SNR_delta = 0;
 guard_size = 8;

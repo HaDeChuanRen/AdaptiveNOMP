@@ -1,23 +1,28 @@
-function [y, omega_true, gain_true] = create_yvector(K, T, N, SNR, sigma_n, S)
+function [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_n, Smat_com)
 %UNTITLED 此处显示有关此函数的摘要
 %   此处显示详细说明
+    [My, Nx] = size(Smat_com);
     omega_true = zeros(K, 1);
-    omega_min = 2 * pi / N;
-    omega_true(1) = pi * (2 * rand - 1);
-    for k = 2 : K
-        th = pi * (2 * rand - 1);
-        while min(abs((wrapToPi(th - omega_true(1 : k - 1))))) < omega_min
-            th = pi * (2*rand - 1);
+    omega_min = 2 * pi / Nx;
+
+    y_noise = sqrt(sigma_n / 2) * (randn(My, S_snap) + 1j*randn(My, S_snap));
+
+    if K > 0
+        omega_true(1) = pi * (2 * rand - 1);
+        for k = 2 : K
+            th = pi * (2 * rand - 1);
+            while min(abs((wrapToPi(th - omega_true(1 : k - 1))))) < omega_min
+                th = pi * (2*rand - 1);
+            end
+            omega_true(k) = th;
         end
-        omega_true(k) = th;
+        omega_true = wrapTo2Pi(omega_true);
+        gain_true = bsxfun(@times, sqrt(sigma_n) * (10 .^ (SNR / 20)),...
+        exp(1j*2*pi*rand(K, S_snap)));  % K* S_snap
+        y_full = exp(1j * (0:(Nx - 1)).' * omega_true.') / sqrt(Nx) * gain_true;
+        y = Smat_com * y_full + y_noise;
+    else
+        y = y_noise;
     end
-    omega_true = wrapTo2Pi(omega_true);
-    gain_true = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR / 20)), exp(1j*2*pi*rand(K,T)));  % K*T
-    % original signal
-    y_full = exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_true;
-    % y_full = zeros(N, T);
-    noise = sqrt(sigma_n / 2) * (randn(N, T) + 1j*randn(N, T));
-    y_noisy = S * y_full + noise;
-    y = y_noisy;
 end
 
