@@ -53,8 +53,10 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
         % alpha_hat = zeros(Khat, 1);
         Tarray_judgement = zeros(Khat, 1);
         Threshold_collect = zeros(Khat, 1);
+        omegaList_save = zeros(Khat - 1, 2, Khat);
+        gainList_save = zeros(Khat - 1, Khat);
         tar_set = 1 : Khat;
-        if Khat > 0
+        if Khat > 1
             for kidx = Khat : -1 : 1
                 % hypothesis testing problem
                 % throwing the kidx th target and calculate the threshold
@@ -64,15 +66,18 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
                 tar_set_diff = setdiff(tar_set, kidx);
 
                 [omegaList_temp, ~, ~] = RefineAll_2D(y_r_det_sq, omegaList(tar_set_diff, :), gainList(tar_set_diff,:), R_s, R_c);
-                [~, y_test, ~] = LeastSquares_2D(y_matrix, omegaList_temp);
+                [gainList_temp, y_test, ~] = LeastSquares_2D(y_matrix, omegaList_temp);
 
                 [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, train_guard_cell, alpha_set, overSamplingRate);
                 % alpha_hat(kidx) = res_inf_normSq_rot / sigma_hat;
+                omegaList_save(:, :, kidx) = omegaList_temp;
+                gainList_save(:, kidx) = gainList_temp;
                 Tarray_judgement(kidx) = T_judgement;
                 Threshold_collect(kidx) = Threshold_CUT;
             end
         else
-            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, alpha_set, overSamplingRate);
+            ymat_test = y_residue_matrix + reshape(A_all_omega, Nx, My) * gainList;
+            [T_judgement, Threshold_CUT] = CFAR_detector2D(ymat_test, train_guard_cell, alpha_set, overSamplingRate);
             % alpha_hat0 = res_inf_normSq_rot / sigma_hat;
             % Tarray_judgement = alpha_hat0/tau-1;
             Tarray_judgement = T_judgement;
@@ -81,17 +86,20 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
         %Tarray_judgement(k): reflects the existance of the kth target: >0, existence,
         %else deactive this target
         [~, ktar_idx] = min(Tarray_judgement);
-        if Tarray_judgement(ktar_idx)<0
-            omegaList(ktar_idx, :) = [];
-            gainList(ktar_idx, :) = [];
+        if Tarray_judgement(ktar_idx) < 0
+            omegaList = omegaList_save(:, :, ktar_idx);
+            gainList = gainList_save(:, ktar_idx);
+            % omegaList(ktar_idx, :) = [];
+            % gainList(ktar_idx, :) = [];
             Khat = Khat - 1;
-            if Khat==0
+            if Khat == 0
                 omegaList = [];
                 gainList = [];
+                Threshold_collect = [];
                 break;
             end
             y_residue_matrix = squeeze(y_r_det(:, :, ktar_idx));
-            [omegaList, gainList, ~] = RefineAll_2D(y_residue_matrix, omegaList, gainList, R_s, R_c);
+            [omegaList, ~, ~] = RefineAll_2D(y_residue_matrix, omegaList, gainList, R_s, R_c);
             [gainList, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omegaList);
         else
             [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, alpha_set, overSamplingRate);
@@ -121,7 +129,6 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
                 break;
             end
         end
-    
     end
 
     if ~isempty(omegaList)

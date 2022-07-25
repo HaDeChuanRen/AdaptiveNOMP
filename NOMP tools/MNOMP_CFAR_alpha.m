@@ -218,7 +218,7 @@ while true
         [T_judgement, Threshold_CUT] = CFAR_1D_alpha(y_r, ...
             sampledManifold, training_cells, alpha_set, omegaList);
 
-        if T_judgement > 0
+        if T_judgement > 0 && (Khat < K_max)
             % detect the new target and refine it
             [omega_new, gain_new, y_r, ~] = detectNew(y_r, sampledManifold);
             for i = 1 : R_s
@@ -253,10 +253,12 @@ end
 
 % revert to standard notion of sinusoid:
 %           exp(1j*(0:(N-1))'*omega)/sqrt(N)
-gainList = bsxfun(@times, gainList,...
-exp(1j*sampledManifold.ant_idx(1)*omegaList));
+if ~isempty(omegaList)
+    gainList = bsxfun(@times, gainList,...
+    exp(1j*sampledManifold.ant_idx(1)*omegaList));
 
-% gainList = gainList .* exp(1j*sampledManifold.ant_idx(1)*omegaList);
-omegaList = wrap_2pi(omegaList);
+    % gainList = gainList .* exp(1j*sampledManifold.ant_idx(1)*omegaList);
+    omegaList = wrap_2pi(omegaList);
+end
 
 end
