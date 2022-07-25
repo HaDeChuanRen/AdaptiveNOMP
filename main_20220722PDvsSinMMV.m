@@ -14,7 +14,8 @@ K = 16;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 
 
-Svec_all = [1, 3, 5, 8, 10, 20, 30, 40, 50];
+% Svec_all = [1, 3, 5, 8, 10, 20, 30, 40, 50];
+Svec_all = 1 : 8;
 length_S = length(Svec_all);
 SNR = 12;
 
@@ -81,21 +82,29 @@ msz = 10;
 
 
 figure(1)
-plot(Svec_all, P_oe * ones(1, length_S), '--k', 'Linewidth', lw)
+plot(Svec_all(1 : 6), P_oe * ones(1, length_S - 3), '--k', 'Linewidth', lw)
 hold on;
-plot(Svec_all, Overestrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(Svec_all, Overestrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all(1 : 6), Overestrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all(1 : 6), Overestrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
 legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
     'NOMP-CA', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('number of snapshot', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Number of snapshot $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
-plot(Svec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all(1 : 6), Detectrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
-plot(Svec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all(1 : 6), Detectrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
+xlabel('Number of snapshots $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+
+figure(3)
+semilogy(Svec_all(1 : 6), 1 - Detectrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
+hold on;
+semilogy(Svec_all(1 : 6), 1 - Detectrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('number of snapshot', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
