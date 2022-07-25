@@ -1,30 +1,20 @@
 % last update: 2022.7.22
-<<<<<<< HEAD
 % simulation of detection rate chenging versus the number of snapshots
-=======
-% simulation of detection rate changing versus the number of snapshots
->>>>>>> f1fdba2b5303d4eaad24912b4ff9145a9ac6b7e3
 
 
 clc; clear; close all;
 
 rng(5);
-<<<<<<< HEAD
+
 MC = 5000;
-=======
-MC = 1000;
->>>>>>> f1fdba2b5303d4eaad24912b4ff9145a9ac6b7e3
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
 K = 16;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 
-<<<<<<< HEAD
+
 Svec_all = [1, 3, 5, 8, 10, 20, 30, 40, 50];
-=======
-Svec_all = [1, 5, 10, 20, 50];
->>>>>>> f1fdba2b5303d4eaad24912b4ff9145a9ac6b7e3
 length_S = length(Svec_all);
 SNR = 12;
 
