@@ -61,12 +61,13 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
                 % hypothesis testing problem
                 % throwing the kidx th target and calculate the threshold
 
-                y_r_det(:, :, kidx) = y_residue_matrix + gainList(kidx) * reshape(A_all_omega(:, kidx), [Nx, My]);
+                % y_r_det(:, :, kidx) = y_residue_matrix + gainList(kidx) * reshape(A_all_omega(:, kidx), [Nx, My]);
                 y_r_det_sq = squeeze(y_r_det(:, :, kidx));
                 tar_set_diff = setdiff(tar_set, kidx);
 
                 [omegaList_temp, ~, ~] = RefineAll_2D(y_r_det_sq, omegaList(tar_set_diff, :), gainList(tar_set_diff,:), R_s, R_c);
                 [gainList_temp, y_test, ~] = LeastSquares_2D(y_matrix, omegaList_temp);
+                y_r_det(:, :, kidx) = y_test;
 
                 [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, train_guard_cell, alpha_set, overSamplingRate);
                 % alpha_hat(kidx) = res_inf_normSq_rot / sigma_hat;

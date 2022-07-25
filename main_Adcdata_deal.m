@@ -114,7 +114,8 @@ xlim([0, range_max])
 
 N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 (2 * guard_n + 1) * (2 * guard_m + 1);
-alpha_set2D = alpha_PoebyS(P_oe, N_r2D, NM_num);
+P_oe2D = 1e-3;
+alpha_set2D = alpha_PoebyS(P_oe2D, N_r2D, NM_num);
 [omegaList, gainList, ~, Threshold_collect] = ...
 NOMP2D_CFAR(y_matrix, alpha_set2D, guard_training_size2D, K_max);
 
@@ -126,27 +127,29 @@ omegax_hat = omegaList(:, 1);
 omegay_hat = wrapToPi(omegaList(:, 2));
 range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre);
 velocity_hat = (c * omegay_hat) / (4 * pi * Fre_start * T_circle);
+target_amp = 20 * log10(abs(gainList));
+target_threshold = 10 * log10(abs(Threshold_collect));
 
-M_velocity = 1024;
-velocity_idx_long = linspace(- velocity_max, velocity_max, M_velocity);
+% M_velocity = 1024;
+% velocity_idx_long = linspace(- velocity_max, velocity_max, M_velocity);
 
-target_amp = nan(N_range, M_velocity);
-target_threshold = nan(N_range, M_velocity);
+% target_amp = nan(N_range, M_velocity);
+% target_threshold = nan(N_range, M_velocity);
 
-target_idxn =  round(N_range * omegax_hat / (2 * pi));
-target_idxm =  round(M_velocity * (omegay_hat + pi) / (2 * pi));
+% target_idxn =  round(N_range * omegax_hat / (2 * pi));
+% target_idxm =  round(M_velocity * (omegay_hat + pi) / (2 * pi));
 
-for k_idx = 1 : K_est
-    target_amp(target_idxn(k_idx) + 1, target_idxm(k_idx)) = 20 * log10(abs(gainList(k_idx)));
-    target_threshold(target_idxn(k_idx) + 1, target_idxm(k_idx)) = 10 * log10(abs(Threshold_collect(k_idx)));
-end
+% for k_idx = 1 : K_est
+%     target_amp(target_idxn(k_idx) + 1, target_idxm(k_idx)) = 20 * log10(abs(gainList(k_idx)));
+%     target_threshold(target_idxn(k_idx) + 1, target_idxm(k_idx)) = 10 * log10(abs(Threshold_collect(k_idx)));
+% end
 
-[range_meshidx, velocity_meshidx] = meshgrid(range_idx_long, velocity_idx_long);
+% [range_meshidx, velocity_meshidx] = meshgrid(range_idx_long, velocity_idx_long);
 
 figure;
-stem3(range_meshidx, velocity_meshidx, target_amp');
+stem3(range_hat, velocity_hat, target_amp');
 hold on;
-stem3(range_meshidx, velocity_meshidx, target_threshold', 'r*');
+stem3(range_hat, velocity_hat, target_threshold', 'r*');
 xlim([0 25])
 xlabel('range(m)');
 ylabel('velocity(m/s)')
