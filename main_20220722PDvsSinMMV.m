@@ -6,7 +6,7 @@ clc; clear; close all;
 
 rng(5);
 
-MC = 5000;
+MC = 50;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -97,14 +97,6 @@ hold on;
 plot(Svec_all(1 : 6), Detectrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('Number of snapshots $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-
-figure(3)
-semilogy(Svec_all(1 : 6), 1 - Detectrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
-hold on;
-semilogy(Svec_all(1 : 6), 1 - Detectrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
-xlabel('number of snapshot', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
