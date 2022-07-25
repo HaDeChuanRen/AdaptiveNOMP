@@ -5,7 +5,7 @@
 clc; clear; close all;
 
 rng(5);
-MC = 1000;
+MC = 10;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -85,13 +85,15 @@ plot(Svec_all, Overestrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 plot(Svec_all, Overestrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
     'NOMP-CA', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('S', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('number of snapshot', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(Svec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(Svec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
+xlabel('number of snapshot', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];

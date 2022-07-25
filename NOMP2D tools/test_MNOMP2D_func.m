@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-rng(5459);
+rng(54);
 c = 3e8;
 
 % signal size parameter
@@ -34,7 +34,7 @@ sigma_n = 1;
 % SNR_all = 5 * rand(1, K_targets) + 1;
 SNR_dB = 16;
 % gain_alltargets = randn(K_targets, 1) + 1j * randn(K_targets, 1);
-gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(1, K_targets));
+gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(K_targets, 1));
 % gain_allK = zeros(1, K_targets);
 
 % set the variable to be estimated and get the corresponding angular frequency

@@ -6,7 +6,7 @@
 clc; clear; close all;
 
 rng(5);
-MC = 1000;
+MC = 10;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -39,6 +39,7 @@ Overestmat_CA = zeros(MC, length_MNratio);
 Detectmat_tau = zeros(MC, length_MNratio);
 Detectmat_CA = zeros(MC, length_MNratio);
 
+% Mento-Carlo method
 tic;
 for sp_idx = 1 : length_MNratio
     M = Nx * MNvec_ratio_all(sp_idx);
@@ -87,13 +88,17 @@ plot(MNvec_ratio_all, Overestrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz
 plot(MNvec_ratio_all, Overestrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
     'NOMP-CA', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('S', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Compressive rate', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(MNvec_ratio_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(MNvec_ratio_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
+xlabel('Compressive rate', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+
+
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
