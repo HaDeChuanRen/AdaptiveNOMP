@@ -91,23 +91,23 @@ plot(alpha_all, Poe_NOMPShigh, 'c--', 'Linewidth', lw, 'Markersize', msz);
 legend('S = 1 (CA)', 'S = 1 (NOMP)', 'S = 10 (CA)', 'S = 10 (NOMP)', ...
 'S = 50 (CA)', 'S = 50 (NOMP)', 'S = 100 (CA)', 'S = 100 (NOMP)');
 xlabel('$\alpha$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('$1 - \bar{P}_{\rm oe}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('$1 - \bar{P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylim([0 1])
 
 
 
-length_Poe = length(Poe_all);
-alpha_cal = zeros(length_Poe, 1);
-S = 50;
-for p_idx = 1 : length_Poe
-    Poe = Poe_all(p_idx);
-    alpha_cal(p_idx) = alpha_PoebyS(Poe, N, N_r, S);
-end
-
-figure(2);
-plot(alpha_cal, Poe_all, 'Linewidth', lw, 'Markersize', msz)
-hold on;
-plot(alpha_all, 1- Poe_alpha(:, 2), 'Linewidth', lw, 'Markersize', msz);
+% length_Poe = length(Poe_all);
+% alpha_cal = zeros(length_Poe, 1);
+% S = 50;
+% for p_idx = 1 : length_Poe
+%     Poe = Poe_all(p_idx);
+%     alpha_cal(p_idx) = alpha_PoebyS(Poe, N, N_r, S);
+% end
+% 
+% figure(2);
+% plot(alpha_cal, Poe_all, 'Linewidth', lw, 'Markersize', msz)
+% hold on;
+% plot(alpha_all, 1- Poe_alpha(:, 2), 'Linewidth', lw, 'Markersize', msz);
 
 
 

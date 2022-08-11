@@ -3,8 +3,8 @@ clc; clear; close all;
 
 % read the ADC data
 orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
-exp_type = '\01people1';
-exp_serial = '\02';
+exp_type = '\02people2';
+exp_serial = '\03';
 
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
 data_cube = readadc(filename);

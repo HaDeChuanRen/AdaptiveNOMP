@@ -6,7 +6,7 @@
 clc; clear; close all;
 
 rng(5);
-MC = 5000;
+MC = 50;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid

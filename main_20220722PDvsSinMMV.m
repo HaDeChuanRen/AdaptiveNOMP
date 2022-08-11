@@ -6,7 +6,7 @@ clc; clear; close all;
 
 rng(5);
 
-MC = 50;
+MC = 5000;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -56,7 +56,7 @@ for sp_idx = 1 : length_S
         Detectmat_tau(mc_idx, sp_idx) = resultstruct_tau.Detect_Eve;
 
         [omegavec_CA, gainvec_CA, ~] = ...
-        MNOMP_CFAR_alpha(y, Smat_com, alpha_set, N_r, K_max);
+        MNOMP_forward_alpha(y, Smat_com, alpha_set, N_r, K_max);
         resultstruct_CA = analysis_result(omega_true, gain_true,...
         omegavec_CA, gainvec_CA, Nx, gamma_oversamping);
         Overestmat_CA(mc_idx, sp_idx) = resultstruct_CA.Overest_Eve;
@@ -82,19 +82,19 @@ msz = 10;
 
 
 figure(1)
-plot(Svec_all(1 : 6), P_oe * ones(1, length_S - 3), '--k', 'Linewidth', lw)
+plot(Svec_all, P_oe * ones(1, length_S), '--k', 'Linewidth', lw)
 hold on;
-plot(Svec_all(1 : 6), Overestrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(Svec_all(1 : 6), Overestrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all, Overestrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all, Overestrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
     'NOMP-CA', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('Number of snapshot $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
-plot(Svec_all(1 : 6), Detectrate_tau(1 : 6), '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
-plot(Svec_all(1 : 6), Detectrate_CA(1 : 6), '-b+', 'Linewidth', lw, 'Markersize', msz)
+plot(Svec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('Number of snapshots $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 

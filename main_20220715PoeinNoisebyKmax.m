@@ -104,6 +104,12 @@ for sp_idx = 1 : Num_Poe
         if ~isempty(omegaList_CA_small)
             Overest_CA_small(mc, sp_idx) = 1;
         end
+        
+%         [omegaList_CA_small, gainList_CA_small, ~] =...
+%         MNOMP_alpha_prob(y_noise, S, alpha_set, N_r, K_max_all(1), CFAR_method);
+%         if ~isempty(omegaList_CA_small)
+%             Overest_CA_small(mc, sp_idx) = 1;
+%         end
 
         % [omegaList_CA_medium, gainList_CA_medium, ~] =...
         % MNOMP_CFAR_alpha(y_noise, S, alpha_set, N_r, K_max_all(2), CFAR_method);

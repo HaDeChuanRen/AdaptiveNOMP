@@ -5,7 +5,7 @@ function results_struct = analysis_result(omega_true, gain_true, omega_hat, gain
     K = length(omega_true);
     Khat_on = 0;
     Khat_off = 0;
-    omega_min = 2 * pi / N;
+    % omega_min = 2 * pi / N;
     omega_trueidx = ceil(omega_true * N * gamma_oversamping / (2 * pi)) + 1;
     results_struct.Miss_Eve = 0;
     results_struct.error_ave = 0;
@@ -21,6 +21,7 @@ function results_struct = analysis_result(omega_true, gain_true, omega_hat, gain
         y_full = zeros(N, 1);
     end
 
+    % calculate the reconstruct error
     if Khat > 0
         for k_idx = 1 : K
             for k_jdx = 1 : Khat
@@ -35,7 +36,7 @@ function results_struct = analysis_result(omega_true, gain_true, omega_hat, gain
         results_struct.reconErr = 1;
     end
 
-
+    % calculate the detection event and false alarm event
     omega_hatidx = ceil(omega_hat * N * gamma_oversamping / (2 * pi)) + 1;
     vec_hatidx = zeros(N * gamma_oversamping + 2, 1);
     vec_hatidx(omega_hatidx) = 1;
@@ -58,6 +59,7 @@ function results_struct = analysis_result(omega_true, gain_true, omega_hat, gain
         %     results_struct.Detect_Eve = 1;
         % end
     elseif Khat == K
+    % calculate the estimation error
         % results_struct.Detect_Eve = 1;
         results_struct.Equal_Eve = 1;
         error_omega = 0;

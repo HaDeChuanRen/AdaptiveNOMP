@@ -9,7 +9,7 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 5000;
+MC = 50;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
@@ -23,7 +23,7 @@ guard_size = 8;
 training_size = 50;
 
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
-S_snap = 10;
+S_snap = 1;
 P_oe001 = 0.01;
 P_oe005 = 0.05;
 

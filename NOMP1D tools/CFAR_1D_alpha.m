@@ -64,9 +64,8 @@ tempidx = round(training_cells / 2);
 noiseidx_sel = noiseidx_ext(remaining_len + peakidx_new - tempidx + (1 : training_cells));
 sigma_hat = mean(prob_ind(noiseidx_sel));
 
-T_judgement = res_inf_normSq_rot/sigma_hat/alpha_set-1;
 Threshold_CUT = alpha_set * sigma_hat;
-
+T_judgement = log(res_inf_normSq_rot / Threshold_CUT);
 
 % trainingidx_set = randperm(remaining_len, training_cells);
 

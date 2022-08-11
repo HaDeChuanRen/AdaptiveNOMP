@@ -8,13 +8,13 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 5;
+MC = 1000;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
 % number of sinusoids in the mixture of sinusoids
 K = 16;
-K_max = K + 4;
+K_max = K * 2;
 
 
 % SNR = 22;
@@ -36,32 +36,33 @@ T = 1;
 
 % Poe_all = [1e-3, 2e-3, 3e-3, 5e-3, 7e-3, 1e-2, 2e-2, 3e-2, 5e-2, 7e-2, 0.1];
 Poe_all = 0.01:0.01:0.12;
+Num_Poe = length(Poe_all);
 
 % Poe_all = [1e-2, 2e-2, 3e-2, 5e-2, 0.1];
 % cauculate the alpha of the NOMP-CA
-N_alpha_g = 10000;
-P_OE_bar = 0.01;
-alpha_true = -log(1-(1-P_OE_bar)^(1/N));
-alpha_grid = linspace(alpha_true/30,5*alpha_true,N_alpha_g);
+% N_alpha_g = 10000;
+% P_OE_bar = 0.01;
+% alpha_true = -log(1-(1-P_OE_bar)^(1/N));
+% alpha_grid = linspace(alpha_true/30,5*alpha_true,N_alpha_g);
 
-res = zeros(N_alpha_g,1);
-for grid_alpha = 1:N_alpha_g
-    fun1 = @(xvar) exp(N*log(1-exp(-alpha_grid(grid_alpha)/(2*N_r)*xvar))+...
-    (N_r-1)*log(xvar)-xvar/2-N_r*log(2)-sum(log(1:N_r-1)));
-    res(grid_alpha) = integral(fun1, 0, Inf);
-end
-Num_Poe = length(Poe_all);
-alpha_CA = zeros(length(Poe_all),1);
+% res = zeros(N_alpha_g,1);
+% for grid_alpha = 1:N_alpha_g
+%     fun1 = @(xvar) exp(N*log(1-exp(-alpha_grid(grid_alpha)/(2*N_r)*xvar))+...
+%     (N_r-1)*log(xvar)-xvar/2-N_r*log(2)-sum(log(1:N_r-1)));
+%     res(grid_alpha) = integral(fun1, 0, Inf);
+% end
+%
+% alpha_CA = zeros(length(Poe_all),1);
 
-figure(555);
-plot(alpha_grid, 1 - res);
+% % figure(555);
+% % plot(alpha_grid, 1 - res);
 
-oneminusPOE = 1 - Poe_all;
-for idx = 1:length(Poe_all)
-    oneminusPOE_idx = oneminusPOE(idx);
-    [~,idxmin] = min(abs(oneminusPOE_idx-res));
-    alpha_CA(idx) = alpha_grid(idxmin);
-end
+% oneminusPOE = 1 - Poe_all;
+% for idx = 1:length(Poe_all)
+%     oneminusPOE_idx = oneminusPOE(idx);
+%     [~,idxmin] = min(abs(oneminusPOE_idx-res));
+%     alpha_CA(idx) = alpha_grid(idxmin);
+% end
 
 
 omega_true = zeros(K, 1);
@@ -105,7 +106,8 @@ tic;
 for sp_idx = 1 : Num_Poe
     P_oe = Poe_all(sp_idx);
 
-    alpha_set = alpha_CA(sp_idx);
+    % alpha_set = alpha_CA(sp_idx);
+    alpha_set = alpha_PoebyS(P_oe, N, N_r);
     tau_NOMP = sigma_n * chi2inv((1 - P_oe) ^ (1 / N), 2 * T) / 2;
 
     for mc = 1 : MC
@@ -125,18 +127,18 @@ for sp_idx = 1 : Num_Poe
         omega_true = wrapTo2Pi(omega_true);
         gain_SNRlow = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR_all(1) / 20)),...
         exp(1j*2*pi*rand(K,T)));  % K*T
-        % gain_SNRmedium = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR_all(2) / 20)),...
-        % exp(1j*2*pi*rand(K,T)));  % K*T
-        % gain_SNRhigh = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR_all(3) / 20)),...
-        % exp(1j*2*pi*rand(K,T)));  % K*T
+        gain_SNRmedium = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR_all(2) / 20)),...
+        exp(1j*2*pi*rand(K,T)));  % K*T
+        gain_SNRhigh = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR_all(3) / 20)),...
+        exp(1j*2*pi*rand(K,T)));  % K*T
         % original signal
         % y_full = exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_true;
         % y_full = zeros(N, T);
         noise = sqrt(sigma_n / 2) * (randn(M, T) + 1j*randn(M, T));
         % y_noisy = S * y_full + noise;
         y_SNRlow = S * exp(1j * (0:(N-1)).' * omega_true.') / sqrt(N) * gain_SNRlow + noise;
-        y_SNRmedium = exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_SNRmedium + noise;
-        y_SNRhigh = exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_SNRhigh + noise;
+        y_SNRmedium = S * exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_SNRmedium + noise;
+        y_SNRhigh = S * exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_SNRhigh + noise;
 
         [omegaList_tau_SNRlow, gainList_tau_SNRlow, ~] = MNOMP(y_SNRlow, S, tau_NOMP);
         results_struct_tau_SNRlow = analysis_result(omega_true, gain_SNRlow,...
@@ -179,9 +181,6 @@ for sp_idx = 1 : Num_Poe
         Overest_CA_SNRhigh(mc, sp_idx) = results_struct_CA_SNRhigh.Overest_Eve;
         Detect_CA_SNRhigh(mc, sp_idx) = results_struct_CA_SNRhigh.Detect_Eve;
 
-
-
-
     end
 end
 
@@ -221,17 +220,17 @@ plot(Poe_all * 100, Overest_rate_tau_SNRlow * 100, 'ro', 'Linewidth', lw,'Marker
 plot(Poe_all * 100, Overest_rate_CA_SNRlow * 100,'bo','Linewidth',lw,'Markersize',msz)
 plot(Poe_all * 100, Overest_rate_tau_SNRmedium * 100,'r+','Linewidth',lw,'Markersize',msz)
 plot(Poe_all * 100, Overest_rate_CA_SNRmedium * 100,'b+','Linewidth',lw,'Markersize',msz)
-% plot(Poe_all * 100, Overest_rate_tau_SNRhigh * 100,'r^','Linewidth',lw,'Markersize',msz)
-% plot(Poe_all * 100, Overest_rate_CA_SNRhigh * 100,'b^','Linewidth',lw,'Markersize',msz)
-legend('${\rm P}_{\rm OE}(nominal)$', 'NOMP(14dB)', 'CA-NOMP(14dB)',...
-    'NOMP(15dB)', 'CA-NOMP(15dB)',...
+plot(Poe_all * 100, Overest_rate_tau_SNRhigh * 100,'r^','Linewidth',lw,'Markersize',msz)
+plot(Poe_all * 100, Overest_rate_CA_SNRhigh * 100,'b^','Linewidth',lw,'Markersize',msz)
+legend('${\rm P}_{\rm OE}(nominal)$', 'NOMP(14dB)', 'CA-NOMP(14dB)', ...
+    'NOMP(15dB)', 'CA-NOMP(15dB)', 'NOMP(18dB)', 'CA-NOMP(18dB)', ...
     'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('nominal ${\rm P}_{\rm OE}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm OE}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 % title_SNR = ['SNR=', num2str(SNR), ', N_r=', num2str(N_r)];
 % title(title_SNR)
-% , 'NOMP(18dB)', 'CA-NOMP(18dB)'
+%
 % , 'SNR = 16dB',...
 % 'SNR = 18dB',
 

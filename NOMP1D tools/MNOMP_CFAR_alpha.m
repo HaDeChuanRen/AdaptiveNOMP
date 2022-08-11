@@ -134,7 +134,7 @@ for cnt_k = 1 : K_max
 end
 
 
-%model order estimation step: implemented to perform the target detection
+% detection step: implemented to perform the target detection
 while true
     % initialize the saving array and target index set
     y_r_det = zeros(M, T, Khat);
@@ -238,7 +238,7 @@ while true
             % refineAll only uses refineOne to weak the energy in the
             % residual measurements y_r which can only decrease as a result
 
-            % Solve least squares for the dictionary set [Ax(omega)] omega 
+            % Solve least squares for the dictionary set [Ax(omega)] omega
             % in omegaList
             [omegaList, gainList, y_r, A] = solveLeastSquares(y,...
                 omegaList, S, sampledManifold.ant_idx);
