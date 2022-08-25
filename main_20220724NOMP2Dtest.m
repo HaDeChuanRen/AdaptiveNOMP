@@ -4,7 +4,7 @@
 clc; clear; close all;
 
 rng(5)
-MC = 300;
+MC = 2000;
 
 % Define Scenario
 Nx = 64; % Length of Sinusoid
@@ -14,7 +14,7 @@ K = 8;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 
 S_snap = 1;
-SNRvec_all = 6 : 2 : 26;
+SNRvec_all = 26 : 2 : 36;
 length_SNR = length(SNRvec_all);
 array_Fun = @(omega, N) exp(1j * (0 : (N - 1))' * omega) / sqrt(N);
 

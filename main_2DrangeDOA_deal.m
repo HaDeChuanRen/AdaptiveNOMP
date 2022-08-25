@@ -2,8 +2,8 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
-exp_type = '\01people1';
+orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4program\Matlab\data\20220506exp\20220506exp';
+exp_type = '\02people2';
 exp_serial = '\03';
 
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
