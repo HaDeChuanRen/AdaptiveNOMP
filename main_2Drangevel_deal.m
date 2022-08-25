@@ -3,8 +3,8 @@ clc; clear; close all;
 
 % read the ADC data
 orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
-exp_type = '\01people1';
-exp_serial = '\02';
+exp_type = '\07multiple';
+exp_serial = '\01';
 
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
 data_cube = readadc(filename);
@@ -23,33 +23,35 @@ Rx_interval = lambda_cw / 2;
 
 
 % set the observation scene
-Nx = 64;
-My = 32;
+Nx = 128;
+My = 64;
 NM_num = Nx * My;
 
 N_start = 1;
-M_start = 17;
-L_start = 1;
+M_start = 2000;
+L_start = 2;
 ymat = squeeze(data_cube(N_start : (N_start + Nx - 1), ...
 M_start : (M_start + My - 1), L_start));
 
 % algorithm parameter set
-guard_n = 4;
-guard_m = 2;
-training_n = 6;
-training_m = 6;
+guard_n = 3;
+guard_m = 3;
+training_n = 5;
+training_m = 5;
 guard_training_size2D = [guard_n, guard_m, training_n, training_m];
 
 
-K_max = 20;
-P_oe2D = 1e-3;
+K_max = 15;
+P_oe2D = 1e-5;
 N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 (2 * guard_n + 1) * (2 * guard_m + 1);
 
 % NOMP method analysis
-alpha_set2D = alpha_PoebyS(P_oe2D, N_r2D, NM_num);
+alpha_set2D = alpha_PoebyS(P_oe2D, NM_num, N_r2D);
+tic;
 [omegaList, gainList, ~, Threshold_collect] = ...
-NOMP2D_CFAR(ymat, alpha_set2D, guard_training_size2D, K_max);
+NOMP2D_CFAR(ymat, alpha_set2D, N_r2D, K_max);
+toc;
 
 
 % NOMP2D_CFAR(y_matrix, p_fa_CFAR, guard_training_size2D, K_max);
@@ -79,17 +81,69 @@ target_threshold = 10 * log10(abs(Threshold_collect));
 % [range_meshidx, velocity_meshidx] = meshgrid(range_idx_long, velocity_idx_long);
 
 figure;
-stem3(range_hat, velocity_hat, target_amp');
+stem3(range_hat, velocity_hat, target_amp);
 hold on;
-stem3(range_hat, velocity_hat, target_threshold', 'r*');
-xlim([0 25])
+stem3(range_hat, velocity_hat, target_threshold, 'r*');
+xlim([0 6])
+ylim([-2 2])
 xlabel('range(m)');
 ylabel('velocity(m/s)')
 zlabel('amplitude(dB)')
 legend('targets amplitude', 'thereshold')
+title('range Doppler estimation by Adap-CFAR-NOMP')
 
 
 
+
+
+% CFAR and FFT results
+tic;
+ymat_absfft = abs(fft2(ymat) / sqrt(NM_num));
+prob_ind_ext = repmat(ymat_absfft .^ 2, [3 3]);
+cfar_detector2D = phased.CFARDetector2D('TrainingBandSize',[training_n, training_m], ...
+'ThresholdFactor', 'Auto', 'GuardBandSize', [guard_n, guard_m], ...
+'ProbabilityFalseAlarm', P_oe2D / NM_num, 'Method', 'CA', 'ThresholdOutputPort', true);
+cfar_detector2D.NoisePowerOutputPort = true;
+
+% figure;
+% imagesc(20 * log10(ymat_absfft))
+
+cut_idx = zeros(2, NM_num);
+for n_idx = 1 : Nx
+    for m_idx = 1 : My
+        cut_idx(:, (n_idx - 1) * My + m_idx) = [Nx + n_idx; My + m_idx];
+    end
+end
+
+[peak_grid, Threshold_CUT, sigma_hat] = cfar_detector2D(prob_ind_ext, cut_idx);
+toc;
+alpha_fft = mean(Threshold_CUT ./ sigma_hat);
+peak_idx = find(peak_grid == 1);
+peak_idx2D = cut_idx(:, peak_idx) - [Nx; My];
+Khat_fft = length(peak_idx);
+Threshold_fft = Threshold_CUT(peak_idx);
+gain_fft = zeros(Khat_fft, 1);
+
+for k_idx = 1 : Khat_fft
+    gain_fft(k_idx) = ymat_absfft(peak_idx2D(1, k_idx), peak_idx2D(2, k_idx));
+end
+
+omegax_hatfft = 2 * pi * (peak_idx2D(1, :)' - 1) / Nx;
+omegay_hatfft = wrapToPi(2 * pi * (peak_idx2D(2, :)' - 1) / My);
+range_hatfft = (c * omegax_hatfft) / (4 * pi * Ts * Slope_fre);
+velocity_hatfft = (c * omegay_hatfft) / (4 * pi * Fre_start * T_circle);
+
+figure;
+stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft));
+hold on;
+stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft), 'r*');
+xlim([0 6])
+ylim([-2 2])
+xlabel('range(m)');
+ylabel('velocity(m/s)')
+zlabel('amplitude(dB)')
+legend('targets amplitude', 'thereshold')
+title('range Doppler estimation by FFT-CFAR')
 
 
 

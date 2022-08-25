@@ -2,10 +2,10 @@
 
 clc; clear; close all;
 
-N = 256;
+N = 256 * 64;
 N_r = 50;
 
-alpha_all = (1 : 0.01 : 15)';
+alpha_all = (1 : 0.01 : 25)';
 S_all = [10, 50, 100];
 % S_max = 2000;
 T_var = 1 : 5000;
@@ -30,8 +30,9 @@ for alpha_idx = 1 : length_alpha
     alpha_set = alpha_all(alpha_idx);
     fun_Poe_alpha = @(Tvar) (N_r / alpha_set) * exp(N * log(1 - exp(- Tvar)) + ...
     (S_snap * N_r - 1) * log(N_r * Tvar / alpha_set) - N_r * Tvar / alpha_set - sum(log(1 : (S_snap * N_r - 1))));
-    Poe_alphaS1(alpha_idx) = sum(fun_Poe_alpha(T_var));
-    % Poe_alphaS1(alpha_idx) = integral(fun_Poe_alpha, 0, Inf);
+    % Poe_alphaS1(alpha_idx) = trapz(fun_Poe_alpha(T_var));
+    % Poe_alphaS1(alpha_idx) = sum(fun_Poe_alpha(T_var));
+    Poe_alphaS1(alpha_idx) = integral(fun_Poe_alpha, 0, Inf);
 end
 
 % .* (Tvar .^ k_seq ./ factorial(k_seq))
@@ -96,18 +97,18 @@ ylim([0 1])
 
 
 
-% length_Poe = length(Poe_all);
-% alpha_cal = zeros(length_Poe, 1);
-% S = 50;
-% for p_idx = 1 : length_Poe
-%     Poe = Poe_all(p_idx);
-%     alpha_cal(p_idx) = alpha_PoebyS(Poe, N, N_r, S);
-% end
-% 
-% figure(2);
-% plot(alpha_cal, Poe_all, 'Linewidth', lw, 'Markersize', msz)
-% hold on;
-% plot(alpha_all, 1- Poe_alpha(:, 2), 'Linewidth', lw, 'Markersize', msz);
+length_Poe = length(Poe_all);
+alpha_cal = zeros(length_Poe, 1);
+S = 1;
+for p_idx = 1 : length_Poe
+    Poe = Poe_all(p_idx);
+    alpha_cal(p_idx) = alpha_PoebyS(Poe, N, N_r, S);
+end
+
+figure(2);
+plot(alpha_cal, Poe_all, 'Linewidth', lw, 'Markersize', msz)
+hold on;
+plot(alpha_all, 1- Poe_alphaS1, 'Linewidth', lw, 'Markersize', msz);
 
 
 
