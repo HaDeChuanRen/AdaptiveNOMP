@@ -72,7 +72,7 @@ guard_n = 2;
 guard_m = 3;
 
 training_n = 5;
-training_m = 5;
+training_m = 6;
 
 guard_training_size = [guard_n, guard_m, training_n, training_m];
 
@@ -88,11 +88,12 @@ K_max = K_targets + 2;
 
 p_fa_CFAR = 1e-2 / (Nx * My);
 p_oe = 1e-2;
-N_r = (2 * training_n + 1) * (2 * training_m + 1) - (2 * guard_n + 1) * (2 * guard_m + 1);
+% N_r = (2 * training_n + 1) * (2 * training_m + 1) - (2 * guard_n + 1) * (2 * guard_m + 1);
 
+N_r = 40;
 alpha_hat = alpha_Poe(p_oe, NM_num, N_r);
 [omegaList, gainList, y_residue_matrix, Threshold_collect] =...
-NOMP2D_CFAR(y_matrix, alpha_hat, guard_training_size, K_max);
+NOMP2D_CFAR(y_matrix, alpha_hat, N_r, K_max);
 
 
 

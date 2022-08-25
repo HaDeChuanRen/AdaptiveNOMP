@@ -1,9 +1,12 @@
 function [omegaList, gainList, y_residue_matrix, Threshold_collect] =...
-NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSamplingRate, R_s, R_c)
+NOMP2D_CFAR(y_matrix, alpha_set, N_r, K_max, guard_band, overSamplingRate, R_s, R_c)
 %NOMP2D_CFAR 此处显示有关此函数的摘要
 %   此处显示详细说明
-    if ~exist('CFAR_method', 'var'), CFAR_method = 'CA';
-    elseif isempty(CFAR_method), CFAR_method = 'CA'; end
+    % if ~exist('CFAR_method', 'var'), CFAR_method = 'CA';
+    % elseif isempty(CFAR_method), CFAR_method = 'CA'; end
+
+    if ~exist('guard_band','var'), guard_band = [3, 3];
+    elseif isempty(guard_band), guard_band = [3, 3]; end
 
     if ~exist('overSamplingRate','var'), overSamplingRate = [4; 4];
     elseif isempty(overSamplingRate), overSamplingRate = [4; 4]; end
@@ -69,7 +72,8 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
                 [gainList_temp, y_test, ~] = LeastSquares_2D(y_matrix, omegaList_temp);
                 y_r_det(:, :, kidx) = y_test;
 
-                [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, train_guard_cell, alpha_set, overSamplingRate);
+                [T_judgement, Threshold_CUT] = CFAR_detector2D(y_test, N_r, ...
+                alpha_set, overSamplingRate, omegaList, guard_band);
                 % alpha_hat(kidx) = res_inf_normSq_rot / sigma_hat;
                 omegaList_save(:, :, kidx) = omegaList_temp;
                 gainList_save(:, kidx) = gainList_temp;
@@ -78,7 +82,8 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
             end
         else
             ymat_test = y_residue_matrix + reshape(A_all_omega, Nx, My) * gainList;
-            [T_judgement, Threshold_CUT] = CFAR_detector2D(ymat_test, train_guard_cell, alpha_set, overSamplingRate);
+            [T_judgement, Threshold_CUT] = CFAR_detector2D(ymat_test, N_r, ...
+            alpha_set, overSamplingRate, omegaList, guard_band);
             % alpha_hat0 = res_inf_normSq_rot / sigma_hat;
             % Tarray_judgement = alpha_hat0/tau-1;
             Tarray_judgement = T_judgement;
@@ -103,7 +108,8 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
             [omegaList, ~, ~] = RefineAll_2D(y_residue_matrix, omegaList, gainList, R_s, R_c);
             [gainList, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omegaList);
         else
-            [T_judgement, Threshold_CUT] = CFAR_detector2D(y_residue_matrix, train_guard_cell, alpha_set, overSamplingRate);
+            [T_judgement, ~] = CFAR_detector2D(y_residue_matrix, ...
+            N_r, alpha_set, overSamplingRate, omegaList, guard_band);
             % alpha_hat0 = res_inf_normSq_rot / sigma_hat;
             % Tarray_judgement0 = alpha_hat0/tau-1;
             if (T_judgement > 0) && (Khat < K_max)
@@ -123,7 +129,7 @@ NOMP2D_CFAR(y_matrix, alpha_set, train_guard_cell, K_max, CFAR_method, overSampl
                 % refineAll only uses refineOne to tweak parameters and the energy
                 % in the residual measurements y_r can only decrease as a result
 
-                % Solve least squares for the dictionary set [Ax(omega)] omega in 
+                % Solve least squares for the dictionary set [Ax(omega)] omega in
                 % omegaList
                 [gainList, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omegaList);
             else

@@ -36,13 +36,17 @@ guard_n = 4;
 training_n = 30;
 N_r = training_n * 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r);
+% 10 * log10(alpha_set)
 
 % CA-NOMP method analysis
+tic;
 [omega_list, gain_list, residueList, Threshold_collect] = ...
 MNOMP_CFAR_alpha(yvec, Smat_com, alpha_set, N_r, K_max);
+toc;
 
 
 % CA-CFAR and FFT analysis
+tic;
 y_fftabs_vector = abs(fft(squeeze(yvec)) / sqrt(Nx));
 prob_ind_ext = repmat(y_fftabs_vector .^ 2, [3, 1]);
 cfar_detector = phased.CFARDetector('NumTrainingCells', 2 * training_n, 'NumGuardCells', 2 * guard_n);
@@ -56,6 +60,7 @@ cfar_detector.ProbabilityFalseAlarm = P_oe / Nx;
 cfar_detector.ThresholdOutputPort = true;
 cfar_detector.NoisePowerOutputPort = true;
 [peak_grid, Threshold_CUT, sigma_hat] = cfar_detector(prob_ind_ext, (Nx + 1 : 2 * Nx)');
+toc;
 
 % figure;
 % plot(peak_grid)
@@ -66,7 +71,7 @@ range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
 range_idx = linspace(0, range_max, Nx);
 range_hatfft = range_idx(peak_grid);
 figure;
-subplot(2, 1, 1)
+% subplot(2, 1, 1)
 plot(range_idx, 20 * log10(y_fftabs_vector));
 hold on;
 stem(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)), 'bo');
@@ -80,7 +85,8 @@ xlim([0, range_max / 5])
 
 omegax_hat = omega_list;
 range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre)
-subplot(2, 1, 2)
+% subplot(2, 1, 2)
+figure;
 stem(range_hat, 20 * log10(abs(gain_list)));
 hold on;
 plot(range_hat, 10 * log10(abs(Threshold_collect)), 'r*');
