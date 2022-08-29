@@ -4,7 +4,11 @@ clc; clear; close all;
 % read the ADC data
 orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
 exp_type = '\02people2';
-exp_serial = '\03';
+exp_serial = '\01';
+
+range_true = [3.09, 4.92];
+K_true = length(range_true);
+amplitude_idx = 60;
 
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
 data_cube = readadc(filename);
@@ -30,8 +34,8 @@ L_start = 1;
 yvec = data_cube(:, M_start, L_start);
 
 % algorithm parameter set
-K_max = 10;
-P_oe = 1e-3;
+K_max = 15;
+P_oe = 1e-2;
 guard_n = 4;
 training_n = 30;
 N_r = training_n * 2;
@@ -62,6 +66,7 @@ cfar_detector.NoisePowerOutputPort = true;
 [peak_grid, Threshold_CUT, sigma_hat] = cfar_detector(prob_ind_ext, (Nx + 1 : 2 * Nx)');
 toc;
 
+% Threshold_CUT ./ sigma_hat
 % figure;
 % plot(peak_grid)
 % T_judgement = res_inf_normSq_rot / Threshold_CUT - 1;
@@ -70,16 +75,25 @@ range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
 % velocity_max = (c * pi) / (4 * pi * Fre_start * T_circle);
 range_idx = linspace(0, range_max, Nx);
 range_hatfft = range_idx(peak_grid);
+
+lw = 2;
+fsz = 12;
+msz = 8;
+
 figure;
 % subplot(2, 1, 1)
-plot(range_idx, 20 * log10(y_fftabs_vector));
+plot(range_idx, 20 * log10(y_fftabs_vector), '-k', 'Linewidth', lw);
 hold on;
-stem(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)), 'bo');
-plot(range_hatfft, 10 * log10(Threshold_CUT(peak_grid)), 'r*')
-legend('FFT result', 'target', 'thereshold')
-xlabel('range(m)')
-ylabel('amplitude(dB)')
-title('FFT result of IF')
+plot(range_idx, 10 * log10(Threshold_CUT), '-.r', 'Linewidth', lw)
+
+% plot(range_true(1)*ones(size(amplitude_idx)), amplitude_idx,':r', range_true(2)*ones(size(amplitude_idx)), amplitude_idx,':r', 'Linewidth', lw);
+% stem(range_true(1), amplitude_idx * ones(K_true, 1), ':.r', 'Linewidth', lw,'DisplayName','True', 'Fontsize', fsz)
+plot(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)), 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
+legend('Spectrum', 'Threshold (CFAR)', 'Detected (CFAR)', 'True', 'Fontsize', fsz)
+xlabel('Range (m)', 'Fontsize', fsz)
+ylabel('Amplitude (dB)', 'Fontsize', fsz)
+% title('FFT result of IF')
 xlim([0, range_max / 5])
 % (c * 2 * pi) / (4 * pi * Ts * Slope_fre)
 
@@ -87,14 +101,15 @@ omegax_hat = omega_list;
 range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre)
 % subplot(2, 1, 2)
 figure;
-stem(range_hat, 20 * log10(abs(gain_list)));
+plot(range_hat, 10 * log10(abs(Threshold_collect)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-plot(range_hat, 10 * log10(abs(Threshold_collect)), 'r*');
-legend('target', 'thereshold')
-xlabel('range(m)')
-ylabel('amplitude(dB)')
-title('NOMP-CFAR result of IF')
-xlim([0, range_max / 5])
+stem(range_hat, 20 * log10(abs(gain_list)), 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
+legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True', 'Fontsize', fsz)
+xlabel('Range (m)', 'Fontsize', fsz)
+ylabel('Amplitude (dB)', 'Fontsize', fsz)
+% title('NOMP-CFAR result of IF')
+% xlim([0, range_max / 5])
 
 
 

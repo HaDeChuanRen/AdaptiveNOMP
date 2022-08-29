@@ -72,7 +72,7 @@ CFAR_detector2D(y_matrix, N_r, alpha_set, overSamplingRate, omegaList, guard_ban
     % sigma_hat = (sum(training_cells(:)) - sum(guard_cells(:))) / N_r;
 
     Threshold_CUT = alpha_set * sigma_hat;
-    T_judgement = res_inf_normSq_rot / Threshold_CUT - 1;
+    T_judgement = 10 * log10(res_inf_normSq_rot / Threshold_CUT);
 
     % cfar_detector = phased.CFARDetector2D('TrainingBandSize', training_band - guard_band, 'GuardBandSize', guard_band);
     % cfar_detector.Method = CFAR_method;

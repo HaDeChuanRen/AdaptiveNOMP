@@ -9,6 +9,10 @@ exp_serial = '\01';
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
 data_cube = readadc(filename);
 
+range_true = [4.87, 2.63];
+velocity_true = [0, 0];
+amp_true = [75, 75];
+
 % radar parameter
 c = 3e8;
 T_idle = 100e-6;
@@ -42,7 +46,7 @@ guard_training_size2D = [guard_n, guard_m, training_n, training_m];
 
 
 K_max = 15;
-P_oe2D = 1e-5;
+P_oe2D = 1e-2;
 N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 (2 * guard_n + 1) * (2 * guard_m + 1);
 
@@ -80,17 +84,28 @@ target_threshold = 10 * log10(abs(Threshold_collect));
 
 % [range_meshidx, velocity_meshidx] = meshgrid(range_idx_long, velocity_idx_long);
 
+
+lw = 2;
+fsz = 12;
+msz = 8;
+
+
+bias = 10 * log10(NM_num);
+
 figure;
-stem3(range_hat, velocity_hat, target_amp);
+
+stem3(range_hat, velocity_hat, target_threshold - bias, 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-stem3(range_hat, velocity_hat, target_threshold, 'r*');
+stem3(range_hat, velocity_hat, target_amp - bias, 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_true, velocity_true, amp_true - bias, ':.m', 'Linewidth', lw);
+
 xlim([0 6])
 ylim([-2 2])
-xlabel('range(m)');
-ylabel('velocity(m/s)')
-zlabel('amplitude(dB)')
-legend('targets amplitude', 'thereshold')
-title('range Doppler estimation by Adap-CFAR-NOMP')
+xlabel('Range (m)', 'Fontsize', fsz);
+ylabel('Velocity (m/s)', 'Fontsize', fsz)
+zlabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True (people 2 and 3)', 'Fontsize', fsz)
+% title('range Doppler estimation by Adap-CFAR-NOMP')
 
 
 
@@ -134,16 +149,17 @@ range_hatfft = (c * omegax_hatfft) / (4 * pi * Ts * Slope_fre);
 velocity_hatfft = (c * omegay_hatfft) / (4 * pi * Fre_start * T_circle);
 
 figure;
-stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft));
+stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft) - bias, 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft), 'r*');
+stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft) - bias, 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_true, velocity_true, amp_true - bias, ':.m', 'Linewidth', lw);
 xlim([0 6])
 ylim([-2 2])
-xlabel('range(m)');
-ylabel('velocity(m/s)')
-zlabel('amplitude(dB)')
-legend('targets amplitude', 'thereshold')
-title('range Doppler estimation by FFT-CFAR')
+xlabel('Range (m)', 'Fontsize', fsz);
+ylabel('Velocity (m/s)', 'Fontsize', fsz)
+zlabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 2 and 3)', 'Fontsize', fsz)
+% title('range Doppler estimation by FFT-CFAR')
 
 
 
