@@ -3,20 +3,20 @@
 % 2022.7.3 : change the save data as MC * Num_SNR
 
 clc; clear; close all;
-set(0,'DefaultLineMarkerSize',12);
-set(0,'DefaultTextFontSize',14);
-set(0,'DefaultAxesFontSize',14);
+% set(0,'DefaultLineMarkerSize',12);
+% set(0,'DefaultTextFontSize',14);
+% set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 50;
+MC = 5;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
 
 K = 8;
 K_max = 2 * K;
-SNR_min_all = 2 : 1 : 12;
+SNR_min_all = 12 : 1 : 22;
 Num_SNR = length(SNR_min_all);
 SNR_delta = 0;
 guard_size = 8;
@@ -108,8 +108,8 @@ for mc = 1 : MC
 
         % NOMP P_oe = 0.01
         [omegaList_tau_001Poe, gainList_tau_001Poe, ~] = MNOMP(y, S_matrix, tau_NOMP_001Poe);
-        results_struct_tau_001Poe = analysis_result(omega_true, gain_true,...
-        omegaList_tau_001Poe, gainList_tau_001Poe, N, gamma_oversamping);
+        results_struct_tau_001Poe = False_Detection(omega_true, gain_true,...
+        omegaList_tau_001Poe, gainList_tau_001Poe, N);
         False_tau_001Poe(mc, sp_idx) = results_struct_tau_001Poe.False_Eve;
         Overest_tau_001Poe(mc, sp_idx) = results_struct_tau_001Poe.Overest_Eve;
         Detect_tau_001Poe(mc, sp_idx) = results_struct_tau_001Poe.Detect_Eve;
@@ -121,8 +121,8 @@ for mc = 1 : MC
         % NOMP-CA P_oe = 0.01 N_r = 50
         [omegaList_CA25_001Poe, gainList_CA25_001Poe, ~] =...
         MNOMP_CFAR_alpha(y, S_matrix, alpha_CA25_001Poe, training_size, K_max, CFAR_method);
-        results_struct_CA25_001Poe = analysis_result(omega_true, gain_true,...
-        omegaList_CA25_001Poe, gainList_CA25_001Poe, N, gamma_oversamping);
+        results_struct_CA25_001Poe = False_Detection(omega_true, gain_true,...
+        omegaList_CA25_001Poe, gainList_CA25_001Poe, N);
         False_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.False_Eve;
         Overest_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.Overest_Eve;
         Detect_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.Detect_Eve;
@@ -136,7 +136,7 @@ end
 
 toc;
 delete(handle_waitbar);
-% CRB_omega = 10 * log10((6 / (N^2 - 1)) * 10 .^ (- (SNR_min_all + SNR_delta / 2) / 10));
+CRB_omega = 10 * log10((6 / (N^2 - 1)) * 10 .^ (- (SNR_min_all + SNR_delta / 2) / 10));
 
 
 False_rate_tau_001Poe = mean(False_tau_001Poe);
@@ -158,9 +158,9 @@ MSEdB_CA25_001Poe(Equal_rate_CA25_001Poe < 0.3) = nan;
 reconErr_CA25_001Poe_ave = 10 * log10(mean(reconErr_CA25_001Poe));
 
 
-lw = 1.6;
+lw = 2;
 fsz = 12;
-msz = 10;
+msz = 8;
 
 figure(1);
 plot(SNR_min_all, P_oe001 * ones(1, Num_SNR), '--k','Linewidth',lw)
@@ -168,7 +168,7 @@ hold on;
 plot(SNR_min_all, Overest_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, Overest_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
-    'NOMP-CA $(N_r = 50)$', 'Interpreter', 'latex', 'Fontsize', fsz)
+    'NOMP-CFAR $(N_r = 50)$', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
@@ -192,7 +192,7 @@ plot(SNR_min_all, False_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
 plot(SNR_min_all, False_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('measured ${\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
+ylabel('measured $\bar{\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
 
 figure(5);
 plot(SNR_min_all, CRB_omega,'--k','Linewidth',lw)
@@ -218,7 +218,7 @@ ylabel('RMSE($\|\hat{\mathbf{y}} - \mathbf{y}\|$) (dB)','Interpreter','latex','F
 
 
 if MC > 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDPFAMSEvsSNR.mat'];
     save(filename_now, 'N', 'P_oe001', 'K', 'SNR_min_all',  'CRB_omega',...
     'False_tau_001Poe', 'Overest_tau_001Poe', 'Detect_tau_001Poe',...
     'Equal_tau_001Poe', 'Miss_tau_001Poe', 'Error_ave_tau_001Poe', 'reconErr_tau_001Poe',...
