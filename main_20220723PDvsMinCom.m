@@ -6,7 +6,7 @@
 clc; clear; close all;
 
 rng(5);
-MC = 50;
+MC = 3000;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -82,20 +82,20 @@ msz = 8;
 
 
 figure(1)
-plot(MNvec_ratio_all, P_oe * ones(1, length_MNratio), '--k', 'Linewidth', lw)
+plot(MNvec_ratio_all(2 : 8), P_oe * ones(1, length_MNratio - 1), '--k', 'Linewidth', lw)
 hold on;
-plot(MNvec_ratio_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(MNvec_ratio_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
+plot(MNvec_ratio_all(2 : 8), Falserate_tau(2 : 8), '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(MNvec_ratio_all(2 : 8), Falserate_CA(2 : 8), '-b+', 'Linewidth', lw, 'Markersize', msz)
 legend('${\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
-    'NOMP-CA', 'Interpreter $M / N$', 'latex', 'Fontsize', fsz)
-xlabel('Compressive rate ', 'Interpreter', 'latex', 'Fontsize', fsz)
+    'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Compressive rate $M / N$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
-plot(MNvec_ratio_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(MNvec_ratio_all(2 : 8), Detectrate_tau(2 : 8), '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
-plot(MNvec_ratio_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-xlabel('Compressive rate $M/N$', 'Interpreter', 'latex', 'Fontsize', fsz)
+plot(MNvec_ratio_all(2 : 8), Detectrate_CA(2 : 8), '-b+', 'Linewidth', lw, 'Markersize', msz)
+xlabel('Compressive rate $M / N$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 

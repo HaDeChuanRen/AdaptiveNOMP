@@ -39,7 +39,7 @@ NOMP2D_CFAR(y_matrix, alpha_set, N_r, K_max, guard_band, overSamplingRate, R_s, 
         omegaList(K_est, :) = omega_k;
         gainList(K_est) = gain_k;
 
-        [omega_est, ~, ~] = RefineAll_2D(y_residue_matrix, omegaList(1 : K_est, :), gainList(1 : K_est), R_s, R_c);
+        [omega_est, gian_est_ref, ~] = RefineAll_2D(y_residue_matrix, omegaList(1 : K_est, :), gainList(1 : K_est), R_s, R_c);
         [gain_est, y_residue_matrix, A_all_omega] = LeastSquares_2D(y_matrix, omega_est);
         omegaList(1 : K_est, :) = omega_est;
         gainList(1 : K_est) = gain_est;

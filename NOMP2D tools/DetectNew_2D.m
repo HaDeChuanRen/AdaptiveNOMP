@@ -26,7 +26,7 @@ function [omega_k, ghat_k, y_residue_matrix] = DetectNew_2D(y_matrix, gamma_over
     [~, idx_max] = max(a2D_fft_abs, [], 'all', 'linear') ;
     [row, col] = ind2sub(Oversam_vec, idx_max);
     ghat_k = Y_spec(row, col);
-    
+
     matrix_idx = [row, col];
 
     % get the angular frequency

@@ -92,9 +92,13 @@ p_oe = 1e-2;
 
 N_r = 40;
 alpha_hat = alpha_Poe(p_oe, NM_num, N_r);
-[omegaList, gainList, y_residue_matrix, Threshold_collect] =...
+[omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
 NOMP2D_CFAR(y_matrix, alpha_hat, N_r, K_max);
 
+S_snap = 1;
+tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / NM_num), 2 * S_snap) / 2;
+[omegaList_tau, gainList_tau, y_residue_matrix] =...
+NOMP2D(y_matrix, tau, K_max);
 
 
 
