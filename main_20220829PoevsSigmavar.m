@@ -78,7 +78,7 @@ Falserate_CA = mean(Falsemat_CA);
 Detectrate_CA = mean(Detectmat_CA);
 
 if MC > 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PFAvsSigmavar.mat'];
     save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_SNR',...
     'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
 end
