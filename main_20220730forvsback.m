@@ -73,6 +73,12 @@ end
 
 toc;
 delete(handle_waitbar);
+if MC > 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_forvsback.mat'];
+    save(filename_now, 'Nx', 'P_oe', 'K', 'SNRvec_all', 'length_SNR',...
+    'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA',...
+    'Falsemat_for', 'Detectmat_for');
+end
 
 % after care
 Falserate_tau = mean(Falsemat_tau);
@@ -85,12 +91,7 @@ Falserate_for = mean(Falsemat_for);
 Detectrate_for = mean(Detectmat_for);
 
 
-if MC > 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_forvsback.mat'];
-    save(filename_now, 'Nx', 'P_oe', 'K', 'SNRvec_all', 'length_SNR',...
-    'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA',...
-    'Falsemat_for', 'Detectmat_for');
-end
+
 
 
 % plot the result
@@ -104,18 +105,18 @@ plot(SNRvec_all, P_oe * ones(1, length_SNR), '--k', 'Linewidth', lw)
 hold on;
 plot(SNRvec_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 plot(SNRvec_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-plot(SNRvec_all, Falserate_for, '-c*', 'Linewidth', lw, 'Markersize', msz)
+plot(SNRvec_all, Falserate_for, '-m*', 'Linewidth', lw, 'Markersize', msz)
 legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
-    'NOMP-CFAR', 'NOMP-CFAR(forward)', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('${\rm SNR}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+    'NOMP-CFAR', 'NOMP-CFAR (forward)', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(SNRvec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(SNRvec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-plot(SNRvec_all, Detectrate_for, '-c*', 'Linewidth', lw, 'Markersize', msz)
-xlabel('${\rm SNR}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+plot(SNRvec_all, Detectrate_for, '-m*', 'Linewidth', lw, 'Markersize', msz)
+xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 

@@ -186,6 +186,15 @@ end
 
 toc;
 delete(handle_waitbar);
+
+if MC >= 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PfavsPfabySNR.mat'];
+    save(filename_now, 'N', 'Poe_all', 'False_CA_SNRlow', 'False_tau_SNRlow',...
+    'Detect_tau_SNRlow', 'Detect_CA_SNRlow', 'False_CA_SNRmedium', 'False_tau_SNRmedium',...
+    'Detect_tau_SNRmedium', 'Detect_CA_SNRmedium', 'False_CA_SNRhigh', 'False_tau_SNRhigh',...
+    'Detect_tau_SNRhigh', 'Detect_CA_SNRhigh');
+end
+
 False_rate_tau_SNRlow = mean(False_tau_SNRlow);
 Detect_rate_tau_SNRlow = mean(Detect_tau_SNRlow);
 False_rate_tau_SNRmedium = mean(False_tau_SNRmedium);
@@ -207,20 +216,14 @@ Detect_rate_CA_SNRhigh = mean(Detect_CA_SNRhigh);
 % False_rate_CA_SNRmedium = mean(False_CA_SNRmedium);
 % False_rate_CA_SNRhigh = mean(False_CA_SNRhigh);
 
-if MC >= 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PfavsPfabySNR.mat'];
-    save(filename_now, 'N', 'Poe_all', 'False_CA_SNRlow', 'False_tau_SNRlow',...
-    'Detect_tau_SNRlow', 'Detect_CA_SNRlow', 'False_CA_SNRmedium', 'False_tau_SNRmedium',...
-    'Detect_tau_SNRmedium', 'Detect_CA_SNRmedium', 'False_CA_SNRhigh', 'False_tau_SNRhigh',...
-    'Detect_tau_SNRhigh', 'Detect_CA_SNRhigh');
-end
+
 
 lw = 2;
 fsz = 12;
 msz = 8;
 
 figure(1);
-plot(Poe_all * 100, Poe_all * 100, '--k','Linewidth',lw)
+plot(Poe_all * 100, Poe_all * 100, '--k', 'Linewidth', lw)
 hold on;
 plot(Poe_all * 100, False_rate_tau_SNRlow * 100, 'ro', 'Linewidth', lw,'Markersize',msz)
 plot(Poe_all * 100, False_rate_CA_SNRlow * 100,'bo','Linewidth',lw,'Markersize',msz)
@@ -228,8 +231,8 @@ plot(Poe_all * 100, False_rate_tau_SNRmedium * 100,'r+','Linewidth',lw,'Markersi
 plot(Poe_all * 100, False_rate_CA_SNRmedium * 100,'b+','Linewidth',lw,'Markersize',msz)
 plot(Poe_all * 100, False_rate_tau_SNRhigh * 100,'r^','Linewidth',lw,'Markersize',msz)
 plot(Poe_all * 100, False_rate_CA_SNRhigh * 100,'b^','Linewidth',lw,'Markersize',msz)
-legend('${\rm P}_{\rm FA}(nominal)$', 'NOMP(14dB)', 'NOMP-CFAR(14dB)', ...
-    'NOMP(15dB)', 'NOMP-CFAR(15dB)', 'NOMP(18dB)', 'NOMP-CFAR(18dB)', ...
+legend('${\rm P}_{\rm FA}$ (nominal)', 'NOMP (14dB)', 'NOMP-CFAR (14dB)', ...
+    'NOMP (15dB)', 'NOMP-CFAR (15dB)', 'NOMP (18dB)', 'NOMP-CFAR (18dB)', ...
     'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('nominal $\bar{\rm P}_{\rm FA}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured $\bar{\rm P}_{\rm FA}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
@@ -249,7 +252,7 @@ plot(Poe_all, Detect_rate_CA_SNRmedium, 'b+', 'Linewidth',lw,'Markersize',msz)
 plot(Poe_all, Detect_rate_tau_SNRhigh, 'r^', 'Linewidth',lw,'Markersize',msz)
 plot(Poe_all, Detect_rate_CA_SNRhigh, 'b^', 'Linewidth',lw,'Markersize',msz)
 xlabel('nominal $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 
 

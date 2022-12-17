@@ -136,8 +136,9 @@ end
 
 toc;
 delete(handle_waitbar);
+SNR_delta = 0;
 CRB_omega = 10 * log10((6 / (N^2 - 1)) * 10 .^ (- (SNR_min_all + SNR_delta / 2) / 10));
-
+Num_SNR = length(SNR_min_all);
 
 False_rate_tau_001Poe = mean(False_tau_001Poe);
 Overest_rate_tau_001Poe = mean(Overest_tau_001Poe);
@@ -162,37 +163,41 @@ lw = 2;
 fsz = 12;
 msz = 8;
 
+% figure(1);
+% plot(SNR_min_all, P_oe001 * ones(1, Num_SNR), '--k','Linewidth',lw)
+% hold on;
+% plot(SNR_min_all, Overest_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
+% plot(SNR_min_all, Overest_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
+% legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
+%     'NOMP-CFAR $(N_r = 50)$', 'Interpreter', 'latex', 'Fontsize', fsz)
+% xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
+% ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+
 figure(1);
 plot(SNR_min_all, P_oe001 * ones(1, Num_SNR), '--k','Linewidth',lw)
 hold on;
-plot(SNR_min_all, Overest_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
-plot(SNR_min_all, Overest_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
-legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
+plot(SNR_min_all, False_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
+plot(SNR_min_all, False_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
     'NOMP-CFAR $(N_r = 50)$', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-
+xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
 
 figure(2);
 plot(SNR_min_all, Equal_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
 plot(SNR_min_all, Equal_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('measured ${\rm P}(\hat{K} = K)$','Interpreter','latex','Fontsize',fsz)
+ylabel('Measured ${\rm P}(\hat{K} = K)$','Interpreter','latex','Fontsize',fsz)
 
 figure(3);
 plot(SNR_min_all, Detect_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
 plot(SNR_min_all, Detect_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('measured ${\rm P}_{\rm D}$','Interpreter','latex','Fontsize',fsz)
+ylabel('Measured $\bar{\rm P}_{\rm D}$','Interpreter','latex','Fontsize',fsz)
 
-figure(4);
-plot(SNR_min_all, False_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
-hold on;
-plot(SNR_min_all, False_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
-xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('measured $\bar{\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
+
 
 figure(5);
 plot(SNR_min_all, CRB_omega,'--k','Linewidth',lw)
@@ -200,22 +205,23 @@ hold on;
 plot(SNR_min_all, MSEdB_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, MSEdB_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('MSE($\omega$) (dB)','Interpreter','latex','Fontsize',fsz)
+ylabel('MSE($\hat{\mathbf \omega}$) (dB)','Interpreter','latex','Fontsize',fsz)
+legend('CRB','Fontsize',fsz)
 
-figure(6);
-plot(SNR_min_all, Miss_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
-hold on;
-plot(SNR_min_all, Miss_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
-xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('measured ${\rm P}_{\rm M}$','Interpreter','latex','Fontsize',fsz)
+% figure(6);
+% plot(SNR_min_all, Miss_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
+% hold on;
+% plot(SNR_min_all, Miss_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
+% xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
+% ylabel('measured ${\rm P}_{\rm M}$','Interpreter','latex','Fontsize',fsz)
 
 figure(7);
 plot(SNR_min_all, reconErr_tau_001Poe_ave,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
 plot(SNR_min_all, reconErr_CA25_001Poe_ave,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
-ylabel('RMSE($\|\hat{\mathbf{y}} - \mathbf{y}\|$) (dB)','Interpreter','latex','Fontsize',fsz)
-
+ylabel('NMSE($\hat{\mathbf{z}}$) (dB)','Interpreter','latex','Fontsize',fsz)
+% \|\hat{\mathbf{z}} - \mathbf{z}\|
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDPFAMSEvsSNR.mat'];

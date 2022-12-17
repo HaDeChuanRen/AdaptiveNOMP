@@ -3,11 +3,11 @@ clc; clear; close all;
 
 % read the ADC data
 
-orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\4program\Matlab\data\20220506exp';
 exp_type = '\02people2';
 exp_serial = '\01';
 N_start = 1;
-M_start = 17;
+M_start = 17; %17 1850
 % L_start = 1;
 
 range_true = [2.95 + 0.14; 4.78 + 0.14];
@@ -79,21 +79,21 @@ theta_NOMPCFAR_deg = theta_NOMPCFAR * 180 / pi;
 lw = 2;
 fsz = 12;
 msz = 8;
-
+range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
 % bias = 10 * log10(NL_num);
 
 figure;
 plot3(range_NOMPCFAR, theta_NOMPCFAR_deg, 10 * log10(abs(Threshold_NOMPCFAR)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_NOMPCFAR, theta_NOMPCFAR_deg, 20 * log10(abs(gain_NOMPCFAR)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw);
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
 grid on;
-xlim([0 5])
-% ylim([-30 30])
+xlim([0 range_max / 2])
+ylim([-40 40])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'True', 'Fontsize', fsz)
+legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'Fontsize', fsz)
 % title('location estimation by Adap-CFAR-NOMP')
 
 omegax_tau = omega_tau(:, 1);
@@ -103,23 +103,25 @@ theta_tau = asin((c * omegaz_tau) / (2 * pi * Fre_start * Rx_interval));
 theta_tau_deg = theta_tau * 180 / pi;
 Khat_tau = length(omegax_tau);
 
-range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
+
 range_idx = linspace(0, range_max, Nx);
 theta_idx = linspace(-90, 90, Lz);
 [range_newidx, theta_newidx] = meshgrid(range_idx, theta_idx);
 
 figure;
-surf(range_newidx, theta_newidx, (10 * log10(tau_set)) * ones(Lz, Nx));
+surf(range_newidx, theta_newidx, (10 * log10(tau_set)) * ones(Lz, Nx),...
+'Linestyle', 'none');
 hold on;
-stem3(range_tau, theta_tau_deg, 20 * log10(abs(gain_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw);
+stem3(range_tau, theta_tau_deg, 20 * log10(abs(gain_tau)), ...
+'bo', 'Linewidth', lw, 'Markersize', msz);
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
 grid on;
-xlim([0 5])
-% ylim([-30 30])
+xlim([0 range_max / 2])
+ylim([-40 40])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'True', 'Fontsize', fsz)
+legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'Fontsize', fsz)
 
 
 % CFAR and FFT results

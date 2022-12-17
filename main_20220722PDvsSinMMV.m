@@ -23,11 +23,11 @@ M = Nx;
 Smat_com = eye(M);
 
 % algorithm parameters
-K_max = 20;
+K_max = 32;
 P_oe = 0.01;
 CFAR_method = 'CA';
 gamma_oversamping = 4;
-N_r = 60;
+N_r = 50;
 
 % statistical variable initialize
 Falsemat_tau = zeros(MC, length_S);
@@ -96,7 +96,7 @@ plot(Svec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(Svec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('Number of snapshots $S$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDinMMV.mat'];

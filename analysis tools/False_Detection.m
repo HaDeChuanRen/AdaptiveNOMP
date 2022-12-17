@@ -35,13 +35,12 @@ function results_struct = False_Detection(omega_true, gain_true, ...
     if sum(Detect_vec) == K
         results_struct.Detect_Eve = 1;
     end
-    results_struct.Miss_Eve = (K - sum(Detect_vec)) / K;
+    results_struct.Miss_Eve = K - sum(Detect_vec);
 
     % judge the false alarm event
     False_vec = min(Dist_omega) > (0.5 * omega_min) ^ 2;
-    if sum(False_vec) > 0
-        results_struct.False_Eve = 1;
-    end
+    results_struct.False_Eve = sum(False_vec);
+
 
     if Khat > K
         results_struct.Overest_Eve = 1;

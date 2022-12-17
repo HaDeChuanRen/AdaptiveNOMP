@@ -2,7 +2,7 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\4program\Matlab\data\20220506exp';
 exp_type = '\07multiple';
 exp_serial = '\01';
 
@@ -93,14 +93,12 @@ msz = 8;
 bias = 10 * log10(NM_num);
 
 figure;
-
 stem3(range_hat, velocity_hat, target_threshold, 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_hat, velocity_hat, target_amp, 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
-
-xlim([0 6])
-ylim([-2 2])
+xlim([0 5])
+ylim([-3 3])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Velocity (m/s)', 'Fontsize', fsz)
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
@@ -153,12 +151,12 @@ stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft), 'rx', 'Linewidth
 hold on;
 stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft), 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
-xlim([0 6])
-ylim([-2 2])
+xlim([0 5])
+ylim([-3 3])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Velocity (m/s)', 'Fontsize', fsz)
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 1 and 2)', 'Fontsize', fsz)
+legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 1 and 2)','Fontsize', fsz)
 % title('range Doppler estimation by FFT-CFAR')
 
 
@@ -183,13 +181,14 @@ velocity_idx = linspace(- velocity_max, velocity_max, My);
 [range_newidx, velocity_newidx] = meshgrid(range_idx, velocity_idx);
 
 figure;
-surf(range_newidx, velocity_newidx, (10 * log10(tau_set)) * ones(My, Nx));
+surf(range_newidx, velocity_newidx, (10 * log10(tau_set)) * ones(My, Nx),...
+'Linestyle', 'none', 'Facealpha', '0.8');
 hold on;
 stem3(range_tau, velocity_tau, 20 * log10(abs(gain_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
 grid on;
 xlim([0 5])
-ylim([-2 2])
+ylim([-3 3])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('velocity (m/s)', 'Interpreter', 'latex', 'Fontsize', fsz);
 zlabel('Amplitude (dB)', 'Fontsize', fsz)

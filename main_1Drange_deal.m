@@ -2,7 +2,7 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'C:\study\MNOMP_CFAR\4program\Matlab\data\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
 exp_type = '\02people2';
 exp_serial = '\01';
 
@@ -42,12 +42,14 @@ N_r = training_n * 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r);
 sigma_set = 10 ^ (24 / 10);
 tau_set = sigma_set * chi2inv((1 - P_oe) ^ (1 / Nx), 2) / 2;
-% 10 * log10(alpha_set)
+% 10 * log10(tau_set)
 
 % CA-NOMP method analysis
 tic;
+% [omega_list, gain_list, residueList, Threshold_collect] = ...
+% MNOMP_CFAR_alpha(yvec, Smat_com, alpha_set, N_r, K_max);
 [omega_list, gain_list, residueList, Threshold_collect] = ...
-MNOMP_CFAR_alpha(yvec, Smat_com, alpha_set, N_r, K_max);
+NOMP1D_fast(yvec, Smat_com, alpha_set, N_r, K_max);
 time_NOMPCFAR = toc;
 
 tic;

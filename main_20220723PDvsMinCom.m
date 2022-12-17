@@ -28,7 +28,7 @@ K_max = K * 2;
 P_oe = 0.01;
 CFAR_method = 'CA';
 gamma_oversamping = 4;
-N_r = 60;
+N_r = 50;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 
@@ -86,17 +86,17 @@ plot(MNvec_ratio_all(2 : 8), P_oe * ones(1, length_MNratio - 1), '--k', 'Linewid
 hold on;
 plot(MNvec_ratio_all(2 : 8), Falserate_tau(2 : 8), '-ro', 'Linewidth', lw, 'Markersize', msz)
 plot(MNvec_ratio_all(2 : 8), Falserate_CA(2 : 8), '-b+', 'Linewidth', lw, 'Markersize', msz)
-legend('${\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
     'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('Compressive rate $M / N$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured ${\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(MNvec_ratio_all(2 : 8), Detectrate_tau(2 : 8), '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(MNvec_ratio_all(2 : 8), Detectrate_CA(2 : 8), '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('Compressive rate $M / N$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 
 if MC > 100

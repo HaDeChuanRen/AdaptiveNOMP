@@ -1,4 +1,4 @@
-% last update: 2022.8.29
+% last update: 2022.12.12
 % simulation of detection rate and false alarm rate changing
 % versus the variance of noise intensity
 
@@ -6,7 +6,7 @@
 
 clc; clear; close all;
 
-rng(5);
+rng(8);
 MC = 5;
 
 % Define Scenario
@@ -29,7 +29,7 @@ N_r = 60;
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
 
-u_vecall = [0; 1; 2; 4; 6; 8; 10];
+u_vecall = [0; 0.1; 0.2; 0.3; 0.5; 0.8];
 length_variable = length(u_vecall);
 
 % statistical variable initialize
@@ -44,12 +44,35 @@ tic;
 
 for u_idx = 1 : length_variable
     u_set = u_vecall(u_idx);
+    % u_set = 0;
 
     for mc_idx = 1 : MC
-        handle_waitbar = waitbar(((u_idx - 1) * MC + mc_idx) / (MC * length_variable));
-        QdB_set = (2 * rand() - 1) * u_set;
-        sigma_set = 10 ^ (QdB_set / 10) * sigma_n;
-        [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_set, Smat_com);
+        handle_waitbar = waitbar(((u_idx - 1) * MC + mc_idx) / ...
+        (MC * length_variable));
+        % QdB_set = (2 * rand() - 1) * u_set;
+        % sigma_set = 10 ^ (QdB_set / 10) * sigma_n;
+        % [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, ...
+        % sigma_set, Smat_com);
+        omega_true = zeros(K, 1);
+        omega_min = 2 * pi / Nx;
+        sigma_vec = sigma_n * (1 + u_set * (1 - 2 * rand(Nx, S_snap)));
+        y_noise = sqrt(sigma_vec / 2) .* (randn(Nx, S_snap) + ...
+        1j * randn(Nx, S_snap));
+        omega_true(1) = pi * (2 * rand - 1);
+        for k = 2 : K
+            th = pi * (2 * rand - 1);
+            while min(abs((wrapToPi(th - omega_true(1 : k - 1))))) ...
+                < omega_min
+                th = pi * (2*rand - 1);
+            end
+            omega_true(k) = th;
+        end
+        omega_true = wrapTo2Pi(omega_true);
+        gain_true = bsxfun(@times, sqrt(sigma_n) * (10 .^ (SNR / 20)),...
+        exp(1j*2*pi*rand(K, S_snap)));  % K * S_snap
+        y_full = exp(1j * (0:(Nx - 1)).' * omega_true.') / ...
+        sqrt(Nx) * gain_true;
+        y = Smat_com * y_full + y_noise;
 
         [omegavec_tau, gainvec_tau, ~] = MNOMP(y, Smat_com, tau_set);
         resultstruct_tau = False_Detection(omega_true, gain_true,...
@@ -77,11 +100,11 @@ Detectrate_tau = mean(Detectmat_tau);
 Falserate_CA = mean(Falsemat_CA);
 Detectrate_CA = mean(Detectmat_CA);
 
-% if MC > 100
-%     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PFAvsSigmavar.mat'];
-%     save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_SNR',...
-%     'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
-% end
+if MC > 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PFAvsSigmavar.mat'];
+    save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_SNR',...
+    'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
+end
 
 % plot the result
 lw = 2;
