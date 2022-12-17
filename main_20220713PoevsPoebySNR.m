@@ -8,7 +8,7 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 1000;
+MC = 3000;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
@@ -82,25 +82,25 @@ S = eye(N);
 % Threshold_collect = zeros(MC, Num_Poe);
 % tau_NOMP_collect = zeros(1, Num_Poe);
 
-Overest_tau_SNRlow = zeros(MC, Num_Poe);
+False_tau_SNRlow = zeros(MC, Num_Poe);
 Detect_tau_SNRlow = zeros(MC, Num_Poe);
-Overest_tau_SNRmedium = zeros(MC, Num_Poe);
+False_tau_SNRmedium = zeros(MC, Num_Poe);
 Detect_tau_SNRmedium = zeros(MC, Num_Poe);
-Overest_tau_SNRhigh = zeros(MC, Num_Poe);
+False_tau_SNRhigh = zeros(MC, Num_Poe);
 Detect_tau_SNRhigh = zeros(MC, Num_Poe);
 
 
-Overest_CA_SNRlow = zeros(MC, Num_Poe);
+False_CA_SNRlow = zeros(MC, Num_Poe);
 Detect_CA_SNRlow = zeros(MC, Num_Poe);
-Overest_CA_SNRmedium = zeros(MC, Num_Poe);
+False_CA_SNRmedium = zeros(MC, Num_Poe);
 Detect_CA_SNRmedium = zeros(MC, Num_Poe);
-Overest_CA_SNRhigh = zeros(MC, Num_Poe);
+False_CA_SNRhigh = zeros(MC, Num_Poe);
 Detect_CA_SNRhigh = zeros(MC, Num_Poe);
 
 
 
-% Overest_CA_noise = zeros(MC, Num_Poe);
-% Overest_tau_noise = zeros(MC, Num_Poe);
+% False_CA_noise = zeros(MC, Num_Poe);
+% False_tau_noise = zeros(MC, Num_Poe);
 
 tic;
 for sp_idx = 1 : Num_Poe
@@ -141,44 +141,44 @@ for sp_idx = 1 : Num_Poe
         y_SNRhigh = S * exp(1j * (0:(N-1)).' * omega_true.')/sqrt(N) * gain_SNRhigh + noise;
 
         [omegaList_tau_SNRlow, gainList_tau_SNRlow, ~] = MNOMP(y_SNRlow, S, tau_NOMP);
-        results_struct_tau_SNRlow = analysis_result(omega_true, gain_SNRlow,...
-        omegaList_tau_SNRlow, gainList_tau_SNRlow, N, gamma_oversamping);
-        Overest_tau_SNRlow(mc, sp_idx) = results_struct_tau_SNRlow.Overest_Eve;
+        results_struct_tau_SNRlow = False_Detection(omega_true, gain_SNRlow,...
+        omegaList_tau_SNRlow, gainList_tau_SNRlow, N);
+        False_tau_SNRlow(mc, sp_idx) = results_struct_tau_SNRlow.False_Eve;
         Detect_tau_SNRlow(mc, sp_idx) = results_struct_tau_SNRlow.Detect_Eve;
 
         [omegaList_tau_SNRmedium, gainList_tau_SNRmedium, ~] =...
         MNOMP(y_SNRmedium, S, tau_NOMP);
-        results_struct_tau_SNRmedium = analysis_result(omega_true, gain_SNRmedium,...
-        omegaList_tau_SNRmedium, gainList_tau_SNRmedium, N, gamma_oversamping);
-        Overest_tau_SNRmedium(mc, sp_idx) = results_struct_tau_SNRmedium.Overest_Eve;
+        results_struct_tau_SNRmedium = False_Detection(omega_true, gain_SNRmedium,...
+        omegaList_tau_SNRmedium, gainList_tau_SNRmedium, N);
+        False_tau_SNRmedium(mc, sp_idx) = results_struct_tau_SNRmedium.False_Eve;
         Detect_tau_SNRmedium(mc, sp_idx) = results_struct_tau_SNRmedium.Detect_Eve;
 
         [omegaList_tau_SNRhigh, gainList_tau_SNRhigh, ~] =...
         MNOMP(y_SNRhigh, S, tau_NOMP);
-        results_struct_tau_SNRhigh = analysis_result(omega_true, gain_SNRhigh,...
-        omegaList_tau_SNRhigh, gainList_tau_SNRhigh, N, gamma_oversamping);
-        Overest_tau_SNRhigh(mc, sp_idx) = results_struct_tau_SNRhigh.Overest_Eve;
+        results_struct_tau_SNRhigh = False_Detection(omega_true, gain_SNRhigh,...
+        omegaList_tau_SNRhigh, gainList_tau_SNRhigh, N);
+        False_tau_SNRhigh(mc, sp_idx) = results_struct_tau_SNRhigh.False_Eve;
         Detect_tau_SNRhigh(mc, sp_idx) = results_struct_tau_SNRhigh.Detect_Eve;
 
         [omegaList_CA_SNRlow, gainList_CA_SNRlow, ~] =...
         MNOMP_CFAR_alpha(y_SNRlow, S, alpha_set, N_r, K_max, CFAR_method);
-        results_struct_CA_SNRlow = analysis_result(omega_true, gain_SNRlow,...
-        omegaList_CA_SNRlow, gainList_CA_SNRlow, N, gamma_oversamping);
-        Overest_CA_SNRlow(mc, sp_idx) = results_struct_CA_SNRlow.Overest_Eve;
+        results_struct_CA_SNRlow = False_Detection(omega_true, gain_SNRlow,...
+        omegaList_CA_SNRlow, gainList_CA_SNRlow, N);
+        False_CA_SNRlow(mc, sp_idx) = results_struct_CA_SNRlow.False_Eve;
         Detect_CA_SNRlow(mc, sp_idx) = results_struct_CA_SNRlow.Detect_Eve;
 
         [omegaList_CA_SNRmedium, gainList_CA_SNRmedium, ~] =...
         MNOMP_CFAR_alpha(y_SNRmedium, S, alpha_set, N_r, K_max, CFAR_method);
-        results_struct_CA_SNRmedium = analysis_result(omega_true, gain_SNRmedium,...
-        omegaList_CA_SNRmedium, gainList_CA_SNRmedium, N, gamma_oversamping);
-        Overest_CA_SNRmedium(mc, sp_idx) = results_struct_CA_SNRmedium.Overest_Eve;
+        results_struct_CA_SNRmedium = False_Detection(omega_true, gain_SNRmedium,...
+        omegaList_CA_SNRmedium, gainList_CA_SNRmedium, N);
+        False_CA_SNRmedium(mc, sp_idx) = results_struct_CA_SNRmedium.False_Eve;
         Detect_CA_SNRmedium(mc, sp_idx) = results_struct_CA_SNRmedium.Detect_Eve;
 
         [omegaList_CA_SNRhigh, gainList_CA_SNRhigh, ~] =...
         MNOMP_CFAR_alpha(y_SNRhigh, S, alpha_set, N_r, K_max, CFAR_method);
-        results_struct_CA_SNRhigh = analysis_result(omega_true, gain_SNRhigh,...
-        omegaList_CA_SNRhigh, gainList_CA_SNRhigh, N, gamma_oversamping);
-        Overest_CA_SNRhigh(mc, sp_idx) = results_struct_CA_SNRhigh.Overest_Eve;
+        results_struct_CA_SNRhigh = False_Detection(omega_true, gain_SNRhigh,...
+        omegaList_CA_SNRhigh, gainList_CA_SNRhigh, N);
+        False_CA_SNRhigh(mc, sp_idx) = results_struct_CA_SNRhigh.False_Eve;
         Detect_CA_SNRhigh(mc, sp_idx) = results_struct_CA_SNRhigh.Detect_Eve;
 
     end
@@ -186,47 +186,53 @@ end
 
 toc;
 delete(handle_waitbar);
-Overest_rate_tau_SNRlow = mean(Overest_tau_SNRlow);
+False_rate_tau_SNRlow = mean(False_tau_SNRlow);
 Detect_rate_tau_SNRlow = mean(Detect_tau_SNRlow);
-Overest_rate_tau_SNRmedium = mean(Overest_tau_SNRmedium);
+False_rate_tau_SNRmedium = mean(False_tau_SNRmedium);
 Detect_rate_tau_SNRmedium = mean(Detect_tau_SNRmedium);
-Overest_rate_tau_SNRhigh = mean(Overest_tau_SNRhigh);
+False_rate_tau_SNRhigh = mean(False_tau_SNRhigh);
 Detect_rate_tau_SNRhigh = mean(Detect_tau_SNRhigh);
 
 
 
-Overest_rate_CA_SNRlow = mean(Overest_CA_SNRlow);
+False_rate_CA_SNRlow = mean(False_CA_SNRlow);
 Detect_rate_CA_SNRlow = mean(Detect_CA_SNRlow);
-Overest_rate_CA_SNRmedium = mean(Overest_CA_SNRmedium);
+False_rate_CA_SNRmedium = mean(False_CA_SNRmedium);
 Detect_rate_CA_SNRmedium = mean(Detect_CA_SNRmedium);
-Overest_rate_CA_SNRhigh = mean(Overest_CA_SNRhigh);
+False_rate_CA_SNRhigh = mean(False_CA_SNRhigh);
 Detect_rate_CA_SNRhigh = mean(Detect_CA_SNRhigh);
 
 
 
-% Overest_rate_CA_SNRmedium = mean(Overest_CA_SNRmedium);
-% Overest_rate_CA_SNRhigh = mean(Overest_CA_SNRhigh);
+% False_rate_CA_SNRmedium = mean(False_CA_SNRmedium);
+% False_rate_CA_SNRhigh = mean(False_CA_SNRhigh);
 
+if MC >= 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PfavsPfabySNR.mat'];
+    save(filename_now, 'N', 'Poe_all', 'False_CA_SNRlow', 'False_tau_SNRlow',...
+    'Detect_tau_SNRlow', 'Detect_CA_SNRlow', 'False_CA_SNRmedium', 'False_tau_SNRmedium',...
+    'Detect_tau_SNRmedium', 'Detect_CA_SNRmedium', 'False_CA_SNRhigh', 'False_tau_SNRhigh',...
+    'Detect_tau_SNRhigh', 'Detect_CA_SNRhigh');
+end
 
-
-lw = 1.6;
+lw = 2;
 fsz = 12;
-msz = 10;
+msz = 8;
 
 figure(1);
 plot(Poe_all * 100, Poe_all * 100, '--k','Linewidth',lw)
 hold on;
-plot(Poe_all * 100, Overest_rate_tau_SNRlow * 100, 'ro', 'Linewidth', lw,'Markersize',msz)
-plot(Poe_all * 100, Overest_rate_CA_SNRlow * 100,'bo','Linewidth',lw,'Markersize',msz)
-plot(Poe_all * 100, Overest_rate_tau_SNRmedium * 100,'r+','Linewidth',lw,'Markersize',msz)
-plot(Poe_all * 100, Overest_rate_CA_SNRmedium * 100,'b+','Linewidth',lw,'Markersize',msz)
-plot(Poe_all * 100, Overest_rate_tau_SNRhigh * 100,'r^','Linewidth',lw,'Markersize',msz)
-plot(Poe_all * 100, Overest_rate_CA_SNRhigh * 100,'b^','Linewidth',lw,'Markersize',msz)
-legend('${\rm P}_{\rm OE}(nominal)$', 'NOMP(14dB)', 'CA-NOMP(14dB)', ...
-    'NOMP(15dB)', 'CA-NOMP(15dB)', 'NOMP(18dB)', 'CA-NOMP(18dB)', ...
+plot(Poe_all * 100, False_rate_tau_SNRlow * 100, 'ro', 'Linewidth', lw,'Markersize',msz)
+plot(Poe_all * 100, False_rate_CA_SNRlow * 100,'bo','Linewidth',lw,'Markersize',msz)
+plot(Poe_all * 100, False_rate_tau_SNRmedium * 100,'r+','Linewidth',lw,'Markersize',msz)
+plot(Poe_all * 100, False_rate_CA_SNRmedium * 100,'b+','Linewidth',lw,'Markersize',msz)
+plot(Poe_all * 100, False_rate_tau_SNRhigh * 100,'r^','Linewidth',lw,'Markersize',msz)
+plot(Poe_all * 100, False_rate_CA_SNRhigh * 100,'b^','Linewidth',lw,'Markersize',msz)
+legend('${\rm P}_{\rm FA}(nominal)$', 'NOMP(14dB)', 'NOMP-CFAR(14dB)', ...
+    'NOMP(15dB)', 'NOMP-CFAR(15dB)', 'NOMP(18dB)', 'NOMP-CFAR(18dB)', ...
     'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('nominal ${\rm P}_{\rm OE}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('measured ${\rm P}_{\rm OE}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('nominal $\bar{\rm P}_{\rm FA}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('measured $\bar{\rm P}_{\rm FA}$ (percent)', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 % title_SNR = ['SNR=', num2str(SNR), ', N_r=', num2str(N_r)];
 % title(title_SNR)
@@ -238,22 +244,16 @@ figure(2);
 plot(Poe_all, Detect_rate_tau_SNRlow, 'ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(Poe_all, Detect_rate_CA_SNRlow, 'bo', 'Linewidth', lw, 'Markersize', msz)
-plot(Poe_all, Detect_rate_tau_SNRmedium,'r+','Linewidth',lw,'Markersize',msz)
-plot(Poe_all, Detect_rate_CA_SNRmedium,'b+','Linewidth',lw,'Markersize',msz)
-plot(Poe_all, Detect_rate_tau_SNRhigh,'r^','Linewidth',lw,'Markersize',msz)
-plot(Poe_all, Detect_rate_CA_SNRhigh,'b^','Linewidth',lw,'Markersize',msz)
-xlabel('nominal ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+plot(Poe_all, Detect_rate_tau_SNRmedium, 'r+', 'Linewidth',lw,'Markersize',msz)
+plot(Poe_all, Detect_rate_CA_SNRmedium, 'b+', 'Linewidth',lw,'Markersize',msz)
+plot(Poe_all, Detect_rate_tau_SNRhigh, 'r^', 'Linewidth',lw,'Markersize',msz)
+plot(Poe_all, Detect_rate_CA_SNRhigh, 'b^', 'Linewidth',lw,'Markersize',msz)
+xlabel('nominal $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
-if MC >= 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
-    save(filename_now, 'N', 'Poe_all', 'Overest_CA_SNRlow', 'Overest_tau_SNRlow',...
-    'Detect_tau_SNRlow', 'Detect_CA_SNRlow', 'Overest_CA_SNRmedium', 'Overest_tau_SNRmedium',...
-    'Detect_tau_SNRmedium', 'Detect_CA_SNRmedium', 'Overest_CA_SNRhigh', 'Overest_tau_SNRhigh',...
-    'Detect_tau_SNRhigh', 'Detect_CA_SNRhigh');
-end
 
-% 'False_rate_infty', 'Overest_rate_infty', 'Detect_rate_infty',...
+
+% 'False_rate_infty', 'False_rate_infty', 'Detect_rate_infty',...
 % 'Equal_rate_infty', 'Miss_rate_infty', 'MSEdB_infty'
-% 'Overest_rate_CA_SNRmedium', 'Overest_rate_CA_SNRhigh'
-% , 'Overest_tau_noise', 'Overest_CA_noise'
+% 'False_rate_CA_SNRmedium', 'False_rate_CA_SNRhigh'
+% , 'False_tau_noise', 'False_CA_noise'

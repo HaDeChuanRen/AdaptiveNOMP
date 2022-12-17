@@ -29,12 +29,12 @@ N_r = 60;
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
 
-u_vecall = [0; 1; 2; 4; 6; 8; 10];
+u_vecall = [0; 2; 4; 6; 8; 10];
 length_variable = length(u_vecall);
 
 % statistical variable initialize
-Overestmat_tau = zeros(MC, length_variable);
-Overestmat_CA = zeros(MC, length_variable);
+Falsemat_tau = zeros(MC, length_variable);
+Falsemat_CA = zeros(MC, length_variable);
 
 Detectmat_tau = zeros(MC, length_variable);
 Detectmat_CA = zeros(MC, length_variable);
@@ -52,16 +52,16 @@ for u_idx = 1 : length_variable
         [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_set, Smat_com);
 
         [omegavec_tau, gainvec_tau, ~] = MNOMP(y, Smat_com, tau_set);
-        resultstruct_tau = analysis_result(omega_true, gain_true,...
-        omegavec_tau, gainvec_tau, Nx, gamma_oversamping);
-        Overestmat_tau(mc_idx, u_idx) = resultstruct_tau.Overest_Eve;
+        resultstruct_tau = False_Detection(omega_true, gain_true,...
+        omegavec_tau, gainvec_tau, Nx);
+        Falsemat_tau(mc_idx, u_idx) = resultstruct_tau.False_Eve;
         Detectmat_tau(mc_idx, u_idx) = resultstruct_tau.Detect_Eve;
 
         [omegavec_CA, gainvec_CA, ~] = ...
         MNOMP_CFAR_alpha(y, Smat_com, alpha_set, N_r, K_max);
-        resultstruct_CA = analysis_result(omega_true, gain_true,...
-        omegavec_CA, gainvec_CA, Nx, gamma_oversamping);
-        Overestmat_CA(mc_idx, u_idx) = resultstruct_CA.Overest_Eve;
+        resultstruct_CA = False_Detection(omega_true, gain_true,...
+        omegavec_CA, gainvec_CA, Nx);
+        Falsemat_CA(mc_idx, u_idx) = resultstruct_CA.False_Eve;
         Detectmat_CA(mc_idx, u_idx) = resultstruct_CA.Detect_Eve;
     end
 end
@@ -71,37 +71,37 @@ toc;
 delete(handle_waitbar);
 
 % after care
-Overestrate_tau = mean(Overestmat_tau);
+Falserate_tau = mean(Falsemat_tau);
 Detectrate_tau = mean(Detectmat_tau);
 
-Overestrate_CA = mean(Overestmat_CA);
+Falserate_CA = mean(Falsemat_CA);
 Detectrate_CA = mean(Detectmat_CA);
 
 if MC > 100
     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
-    save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_SNR',...
-    'Overestmat_tau', 'Overestmat_CA', 'Detectmat_tau', 'Detectmat_CA');
+    save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_variable',...
+    'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
 end
 
 % plot the result
-lw = 1.6;
+lw = 2;
 fsz = 12;
-msz = 10;
+msz = 8;
 
 
 figure(1)
-plot(u_vecall, P_oe * ones(1, length_variable), '--k', 'Linewidth', lw)
+semilogy(u_vecall, P_oe * ones(1, length_variable) / Nx, '--k', 'Linewidth', lw)
 hold on;
-plot(u_vecall, Overestrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(u_vecall, Overestrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-legend('${\rm P}_{\rm OE} = 0.01$', 'NOMP', ...
-    'NOMP-CA', 'Interpreter', 'latex', 'Fontsize', fsz)
-xlabel('${\rm SNR}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured ${\rm P}_{\rm OE}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+semilogy(u_vecall, Falserate_tau / Nx, '-ro', 'Linewidth', lw, 'Markersize', msz)
+semilogy(u_vecall, Falserate_CA / Nx, '-b+', 'Linewidth', lw, 'Markersize', msz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01 / N$', 'NOMP', ...
+    'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Strength of Noise Fluctuation $u$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA} / N$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(u_vecall, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
 plot(u_vecall, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-xlabel('${\rm SNR}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Strength of Noise Fluctuation $u$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
