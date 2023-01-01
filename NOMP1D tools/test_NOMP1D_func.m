@@ -4,10 +4,7 @@ rng(54);
 c = 3e8;
 
 % signal size parameter
-Nx = 64;
-My = 32;
-
-NM_num = Nx * My;
+Nx = 256;
 
 % radar parameter
 T_idle = 100e-6;
@@ -46,24 +43,22 @@ theta_set = pi * rand(1, K_targets) - pi / 2;
 % omega_y = 4 * pi * Fre_start * velocity_set * T_circle / c;
 
 omega_x = 1 : 4;
-omega_y = 5 : 8;
+% omega_y = 5 : 8;
 
-omega_true = [omega_x; omega_y];
+% omega_true = [omega_x; omega_y];
 % omega_true = [1, 2, 3, 4; 5, 6, 7, 8];
 
 array_Fun = @(omega, N) exp(1j * (0 : (N - 1))' * omega) / sqrt(N);
-y_vec = zeros(NM_num, 1);
+y_vec = zeros(Nx, 1);
 
 for k_idx = 1 : K_targets
-    y_veck = kron(array_Fun(omega_y(k_idx), My), array_Fun(omega_x(k_idx), Nx));
+    y_veck = array_Fun(omega_x(k_idx), Nx);
     y_vec = gain_allK(k_idx) * y_veck + y_vec;
 end
 
-y_matrix_pure = reshape(y_vec, Nx, My);
-% y_fft = fft2(y_matrix);
-y_matrix = y_matrix_pure + (sigma_n / 2) * (1j * randn(Nx, My) + randn(Nx, My));
+y_vec = y_vec + sqrt(1 / 2) *(randn(Nx, 1) + 1j * randn(Nx, 1));
 
-gamma_mnomp = [4, 4];
+% gamma_mnomp = [4, 4];
 K_known = K_targets;
 % [omega_list, gain_list, ~] = MNOMP2D_Kknown_serial(y_matrix, gamma_mnomp, K_known);
 
@@ -80,81 +75,32 @@ P_false_nominal = 1e-2;
 
 gamma_cfar = [1, 1];
 % gamma_mnomp = [4, 4, 4];
-MC = 1000;
+% MC = 1000;
 % alpha_set = alpha_cal_2D_ca(gamma_cfar, P_false_nominal, Nx, My, guard_training_size, MC);
 K_max = K_targets + 2;
 
 % [omega_list, gain_list, y_residue_matrix, overthr_alldB] = MNOMP2D_CA_alpha_serial(y_matrix, gamma_cfar, gamma_mnomp, guard_training_size, alpha_set, K_max);
 
-p_fa_CFAR = 1e-2 / (Nx * My);
+% p_fa_CFAR = 1e-2 / (Nx * My);
 p_oe = 1e-2;
 % N_r = (2 * training_n + 1) * (2 * training_m + 1) - (2 * guard_n + 1) * (2 * guard_m + 1);
 
 N_r = 40;
-alpha_hat = alpha_Poe(p_oe, NM_num, N_r);
+S = eye(Nx);
+alpha_hat = alpha_Poe(p_oe, Nx, N_r);
+% [omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
+% MNOMP_CFAR_alpha(y_vec, S, alpha_hat, N_r, K_max);
 [omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
-NOMP2D_CFAR(y_matrix, alpha_hat, N_r, K_max);
+NOMP1D_fast(y_vec, S, alpha_hat, N_r, K_max);
 
 S_snap = 1;
-tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / NM_num), 2 * S_snap) / 2;
+tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 [omegaList_tau, gainList_tau, y_residue_matrix] =...
-NOMP2D(y_matrix, tau, K_max);
+MNOMP(y_vec, S, tau, K_max);
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% figure;
-% imagesc(abs(y_fft));
-
-% omega_est = [];
-% ghat = [];
-% K_est = 0;
-% R_c = 20;
-% R_s = 40;
-% y_residue_matrix = y_matrix;
-% K_known = K_targets;
-
-% gamma_mnomp = [4, 4];
-
-% while (K_est < K_known)
-%     [omega_k, ghat_k, y_residue_matrix] = detectnew_2D_serial(y_residue_matrix, gamma_mnomp);
-
-%     for refione_idx = 1 : R_s
-%         [y_residue_matrix, omega_k, ghat_k] = refineone_2D_serial(y_residue_matrix, omega_k, ghat_k);
-%     end
-
-%     K_est = K_est + 1;
-%     omega_est = [omega_est, omega_k];
-%     ghat = [ghat; ghat_k];
-
-%     % [omega_est, ghat, y_residue_matrix] = refineall_3D_serial(y_residue_matrix, omega_est, ghat, R_s, R_c);
-%     [omega_est, ghat, y_residue_matrix] = refineall_2D_serial(y_residue_matrix, omega_est, ghat, R_s, R_c);
-%     % [ghat, y_residue_matrix] = LS_3D(y_matrix, omega_est);
-%     [ghat, y_residue_matrix] = LS_2D(y_matrix, omega_est);
-% end
-
-% omega_list = omega_est;
-% gain_list = ghat;
 
 
 

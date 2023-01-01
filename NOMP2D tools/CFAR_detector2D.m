@@ -23,7 +23,7 @@ CFAR_detector2D(y_matrix, N_r, alpha_set, overSamplingRate, omegaList, guard_ban
     prob_ind_ext = repmat(prob_ind, 3, 3);
 
     if isempty(omegaList)
-        omega_2DindexList = [];
+        omega_2DindexList = [0.5, 0.5];
     else
         omega_2DindexList = round((omegaList / (2 * pi)) .* [Nx, My]);
         % omega_indexList = sub2ind([Nx, My], omega_2DindexList(:, 1), omega_2DindexList(:, 2));

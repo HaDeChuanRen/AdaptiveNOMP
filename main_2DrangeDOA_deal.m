@@ -8,10 +8,10 @@ orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4p
 exp_type = '\02people2';
 exp_serial = '\01';
 N_start = 1;
-M_start = 17;
+M_start = 17; %17 1850
 % L_start = 1;
 
-range_true = [3.09; 4.92];
+range_true = [2.95 + 0.14; 4.78 + 0.14];
 theta_true = [- 19.8; 0];
 K_ture = length(range_true);
 amp_true = 60 * ones(K_ture, 1);
@@ -48,55 +48,81 @@ training_l = 1;
 guard_training_size2D = [guard_n, guard_l, training_n, training_l];
 
 
-K_max = 15;
+K_max = 32;
 P_oe2D = 1e-2;
 N_r2D = (2 * training_n + 1) * (2 * training_l + 1) - ...
 (2 * guard_n + 1) * (2 * guard_l + 1);
 % N_r2D = 40;
 alpha_set2D = alpha_PoebyS(P_oe2D, NL_num, N_r2D);
 guard_band = [guard_n, guard_l];
+sigma_set = 10 ^ (24 / 10);
+tau_set = sigma_set * chi2inv((1 - P_oe2D) ^ (1 / NL_num), 2) / 2;
 
 % NOMP method analysis
 tic;
-[omega_DOA, gain_DOA, ~, Threshold_DOA] = ...
+[omega_NOMPCFAR, gain_NOMPCFAR, ~, Threshold_NOMPCFAR] = ...
 NOMP2D_CFAR(ymat, alpha_set2D, N_r2D, K_max, guard_band);
-toc;
+time_NOMPCFAR = toc;
 
-omegax_hat = omega_DOA(:, 1);
-omegaz_hat = wrapToPi(omega_DOA(:, 2));
-range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre);
-theta_hat = asin((c * omegaz_hat) / (2 * pi * Fre_start * Rx_interval));
+tic;
+[omega_tau, gain_tau, ~] = ...
+NOMP2D(ymat, tau_set, K_max);
+time_tau = toc;
+
+omegax_NOMPCFAR = omega_NOMPCFAR(:, 1);
+omegaz_NOMPCFAR = wrapToPi(omega_NOMPCFAR(:, 2));
+range_NOMPCFAR = (c * omegax_NOMPCFAR) / (4 * pi * Ts * Slope_fre);
+theta_NOMPCFAR = asin((c * omegaz_NOMPCFAR) / (2 * pi * Fre_start * Rx_interval));
+theta_NOMPCFAR_deg = theta_NOMPCFAR * 180 / pi;
 
 
-theta_hat_deg = theta_hat * 180 / pi;
-
-
-
-xloc_hat = range_hat .* sin(theta_hat);
-yloc_hat = range_hat .* cos(theta_hat);
 
 lw = 2;
 fsz = 12;
 msz = 8;
-
-
-
-bias = 10 * log10(NL_num);
+range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
+% bias = 10 * log10(NL_num);
 
 figure;
-plot3(range_hat, theta_hat_deg, 10 * log10(abs(Threshold_DOA)) - bias, 'rx', 'Linewidth', lw, 'Markersize', msz);
+plot3(range_NOMPCFAR, theta_NOMPCFAR_deg, 10 * log10(abs(Threshold_NOMPCFAR)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-stem3(range_hat, theta_hat_deg, 20 * log10(abs(gain_DOA)) - bias, 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, theta_true, amp_true - bias, ':.m', 'Linewidth', lw);
+stem3(range_NOMPCFAR, theta_NOMPCFAR_deg, 20 * log10(abs(gain_NOMPCFAR)), 'bo', 'Linewidth', lw, 'Markersize', msz);
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
 grid on;
-xlim([0 5])
-% ylim([-30 30])
+xlim([0 range_max / 2])
+ylim([-40 40])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
-zlabel('Amplitude(dB)', 'Fontsize', fsz)
-legend('Threshold', 'Amplitude', 'True', 'Fontsize', fsz)
+zlabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'Fontsize', fsz)
 % title('location estimation by Adap-CFAR-NOMP')
 
+omegax_tau = omega_tau(:, 1);
+omegaz_tau = wrapToPi(omega_tau(:, 2));
+range_tau = (c * omegax_tau) / (4 * pi * Ts * Slope_fre);
+theta_tau = asin((c * omegaz_tau) / (2 * pi * Fre_start * Rx_interval));
+theta_tau_deg = theta_tau * 180 / pi;
+Khat_tau = length(omegax_tau);
+
+
+range_idx = linspace(0, range_max, Nx);
+theta_idx = linspace(-90, 90, Lz);
+[range_newidx, theta_newidx] = meshgrid(range_idx, theta_idx);
+
+figure;
+surf(range_newidx, theta_newidx, (10 * log10(tau_set)) * ones(Lz, Nx),...
+'Linestyle', 'none');
+hold on;
+stem3(range_tau, theta_tau_deg, 20 * log10(abs(gain_tau)), ...
+'bo', 'Linewidth', lw, 'Markersize', msz);
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
+grid on;
+xlim([0 range_max / 2])
+ylim([-40 40])
+xlabel('Range (m)', 'Fontsize', fsz);
+ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
+zlabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'Fontsize', fsz)
 
 
 % CFAR and FFT results

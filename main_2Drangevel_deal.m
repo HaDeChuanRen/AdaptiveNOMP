@@ -45,7 +45,7 @@ training_m = 5;
 guard_training_size2D = [guard_n, guard_m, training_n, training_m];
 
 
-K_max = 15;
+K_max = 32;
 P_oe2D = 1e-2;
 N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 (2 * guard_n + 1) * (2 * guard_m + 1);
@@ -93,18 +93,16 @@ msz = 8;
 bias = 10 * log10(NM_num);
 
 figure;
-
-stem3(range_hat, velocity_hat, target_threshold - bias, 'rx', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_hat, velocity_hat, target_threshold, 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-stem3(range_hat, velocity_hat, target_amp - bias, 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, velocity_true, amp_true - bias, ':.m', 'Linewidth', lw);
-
-xlim([0 6])
-ylim([-2 2])
+stem3(range_hat, velocity_hat, target_amp, 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+xlim([0 5])
+ylim([-3 3])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Velocity (m/s)', 'Fontsize', fsz)
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True (people 2 and 3)', 'Fontsize', fsz)
+legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True (people 1 and 2)', 'Fontsize', fsz)
 % title('range Doppler estimation by Adap-CFAR-NOMP')
 
 
@@ -149,17 +147,54 @@ range_hatfft = (c * omegax_hatfft) / (4 * pi * Ts * Slope_fre);
 velocity_hatfft = (c * omegay_hatfft) / (4 * pi * Fre_start * T_circle);
 
 figure;
-stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft) - bias, 'rx', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
-stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft) - bias, 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, velocity_true, amp_true - bias, ':.m', 'Linewidth', lw);
-xlim([0 6])
-ylim([-2 2])
+stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft), 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+xlim([0 5])
+ylim([-3 3])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Velocity (m/s)', 'Fontsize', fsz)
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 2 and 3)', 'Fontsize', fsz)
+legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 1 and 2)','Fontsize', fsz)
 % title('range Doppler estimation by FFT-CFAR')
+
+
+% NOMP method
+sigma_set = 10 ^ (24 / 10);
+tau_set = sigma_set * chi2inv((1 - P_oe2D) ^ (1 / NM_num), 2) / 2;
+tic;
+[omega_tau, gain_tau, ~] = NOMP2D(ymat, tau_set, K_max);
+time_tau = toc;
+
+
+omegax_tau = omega_tau(:, 1);
+omegay_tau = wrapToPi(omega_tau(:, 2));
+range_tau = (c * omegax_tau) / (4 * pi * Ts * Slope_fre);
+velocity_tau = (c * omegay_tau) / (4 * pi * Fre_start * T_circle);
+Khat_tau = length(omegax_tau);
+
+range_max = (c * 2 * pi) / (4 * pi * Ts * Slope_fre);
+velocity_max = (c * pi) / (4 * pi * Fre_start * T_circle);
+range_idx = linspace(0, range_max, Nx);
+velocity_idx = linspace(- velocity_max, velocity_max, My);
+[range_newidx, velocity_newidx] = meshgrid(range_idx, velocity_idx);
+
+figure;
+surf(range_newidx, velocity_newidx, (10 * log10(tau_set)) * ones(My, Nx),...
+'Linestyle', 'none', 'Facealpha', '0.8');
+hold on;
+stem3(range_tau, velocity_tau, 20 * log10(abs(gain_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+grid on;
+xlim([0 5])
+ylim([-3 3])
+xlabel('Range (m)', 'Fontsize', fsz);
+ylabel('velocity (m/s)', 'Interpreter', 'latex', 'Fontsize', fsz);
+zlabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'True (people 1 and 2)', 'Fontsize', fsz)
+
+
 
 
 

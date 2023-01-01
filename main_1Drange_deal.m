@@ -6,7 +6,7 @@ orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4p
 exp_type = '\02people2';
 exp_serial = '\01';
 
-range_true = [3.09, 4.92];
+range_true = [2.95 + 0.14; 4.78 + 0.14];
 K_true = length(range_true);
 amplitude_idx = 60;
 
@@ -34,20 +34,27 @@ L_start = 1;
 yvec = data_cube(:, M_start, L_start);
 
 % algorithm parameter set
-K_max = 15;
+K_max = 32;
 P_oe = 1e-2;
 guard_n = 4;
 training_n = 30;
 N_r = training_n * 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r);
-% 10 * log10(alpha_set)
+sigma_set = 10 ^ (24 / 10);
+tau_set = sigma_set * chi2inv((1 - P_oe) ^ (1 / Nx), 2) / 2;
+% 10 * log10(tau_set)
 
 % CA-NOMP method analysis
 tic;
+% [omega_list, gain_list, residueList, Threshold_collect] = ...
+% MNOMP_CFAR_alpha(yvec, Smat_com, alpha_set, N_r, K_max);
 [omega_list, gain_list, residueList, Threshold_collect] = ...
-MNOMP_CFAR_alpha(yvec, Smat_com, alpha_set, N_r, K_max);
-toc;
+NOMP1D_fast(yvec, Smat_com, alpha_set, N_r, K_max);
+time_NOMPCFAR = toc;
 
+tic;
+[omegalist_tau, gainlist_tau, ~] = MNOMP(yvec, Smat_com, tau_set);
+time_tau = toc;
 
 % CA-CFAR and FFT analysis
 tic;
@@ -64,7 +71,7 @@ cfar_detector.ProbabilityFalseAlarm = P_oe / Nx;
 cfar_detector.ThresholdOutputPort = true;
 cfar_detector.NoisePowerOutputPort = true;
 [peak_grid, Threshold_CUT, sigma_hat] = cfar_detector(prob_ind_ext, (Nx + 1 : 2 * Nx)');
-toc;
+time_CFAR = toc;
 
 % Threshold_CUT ./ sigma_hat
 % figure;
@@ -80,6 +87,11 @@ lw = 2;
 fsz = 12;
 msz = 8;
 
+bias = 10 * log10(Nx);
+
+% figure;
+% plot(20 * log10(y_fftabs_vector))
+
 figure;
 % subplot(2, 1, 1)
 plot(range_idx, 20 * log10(y_fftabs_vector), '-k', 'Linewidth', lw);
@@ -88,14 +100,33 @@ plot(range_idx, 10 * log10(Threshold_CUT), '-.r', 'Linewidth', lw)
 
 % plot(range_true(1)*ones(size(amplitude_idx)), amplitude_idx,':r', range_true(2)*ones(size(amplitude_idx)), amplitude_idx,':r', 'Linewidth', lw);
 % stem(range_true(1), amplitude_idx * ones(K_true, 1), ':.r', 'Linewidth', lw,'DisplayName','True', 'Fontsize', fsz)
-plot(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
+plot(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)) , 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem(range_true, amplitude_idx * ones(K_true, 1) , ':.m', 'Linewidth', lw)
 legend('Spectrum', 'Threshold (CFAR)', 'Detected (CFAR)', 'True', 'Fontsize', fsz)
 xlabel('Range (m)', 'Fontsize', fsz)
 ylabel('Amplitude (dB)', 'Fontsize', fsz)
 % title('FFT result of IF')
 xlim([0, range_max / 5])
 % (c * 2 * pi) / (4 * pi * Ts * Slope_fre)
+
+
+
+omegax_tau = omegalist_tau;
+range_tau = (c * omegax_tau) / (4 * pi * Ts * Slope_fre)
+Khat_tau = length(omegax_tau);
+
+figure;
+plot(range_idx, 10 * log10(tau_set) * ones(Nx, 1), 'r', 'Linewidth', lw, 'Markersize', msz);
+hold on;
+stem(range_tau, 20 * log10(abs(gainlist_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
+stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
+legend('Threshold (NOMP)', 'Detected (NOMP)', 'True', 'Fontsize', fsz)
+xlim([0, range_max / 5])
+xlabel('Range (m)', 'Fontsize', fsz)
+ylabel('Amplitude (dB)', 'Fontsize', fsz)
+
+
+
 
 omegax_hat = omega_list;
 range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre)
@@ -109,7 +140,7 @@ legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True', 'Fontsize', fsz)
 xlabel('Range (m)', 'Fontsize', fsz)
 ylabel('Amplitude (dB)', 'Fontsize', fsz)
 % title('NOMP-CFAR result of IF')
-% xlim([0, range_max / 5])
+xlim([0, range_max / 5])
 
 
 
