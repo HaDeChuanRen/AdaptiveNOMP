@@ -90,13 +90,13 @@ S = eye(Nx);
 alpha_hat = alpha_Poe(p_oe, Nx, N_r);
 % [omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
 % MNOMP_CFAR_alpha(y_vec, S, alpha_hat, N_r, K_max);
-[omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
-NOMP1D_fast(y_vec, S, alpha_hat, N_r, K_max);
+[omegaList_CFAR, gainListCFAR, ~, Threshold_collect] = ...
+MNOMP_CFARtr(y_vec, S, alpha_hat, N_r, K_max);
 
-S_snap = 1;
-tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / Nx), 2 * S_snap) / 2;
-[omegaList_tau, gainList_tau, y_residue_matrix] =...
-MNOMP(y_vec, S, tau, K_max);
+% S_snap = 1;
+% tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / Nx), 2 * S_snap) / 2;
+% [omegaList_tau, gainList_tau, y_residue_matrix] =...
+% MNOMP(y_vec, S, tau, K_max);
 
 
 

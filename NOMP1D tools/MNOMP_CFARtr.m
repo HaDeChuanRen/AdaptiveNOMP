@@ -1,19 +1,9 @@
-function [omegaList, gainList, residueList, Threshold_collect] =...
-MNOMP_CFAR_alpha(y, S, alpha_set, training_cells, K_max, CFAR_method,...
-overSamplingRate, R_s, R_c)
-% last refinement date: 2022.6.30
-% 2022.6.30: 1. separate the function file into different parts
-% 2022.6.26: 1. change the parameter training_gurad_cell as
-%           training_cells (which is equal to N_r), set gurad_cells as 5
-%           2. test the range of Target_set
-%           3. test the setdiff function.
-%           4. change some name of variables
-% 2022.6.25: 1. add notes to the functions
-% 2022.6.24: 1. make CAFR_method optianal
-%           2. add notes to the functions
+function [omegaList, gainList, residueList, Threshold_collect] = ...
+    MNOMP_CFARtr(y, S, alpha_set, training_cells, K_max, ...
+    overSamplingRate, R_s, R_c)
+% last refinement date: 2022.12.12
 % code is built based on NOMP-CFAR
 % SUMMARY:
-%
 %   given measurements: y = S * (mixture of sinusoids) + white noise
 %          and a parameter tau which relates reduction in residue to
 %          sparsity of the explanation (number of sinusoids),
@@ -53,8 +43,6 @@ overSamplingRate, R_s, R_c)
 %   Threshold_collect - threshold collected with CFAR method
 
 % initialize the parameters
-if ~exist('CFAR_method','var'), CFAR_method = 'CA';
-elseif isempty(CFAR_method), CFAR_method = 'CA'; end
 
 if ~exist('overSamplingRate','var'), overSamplingRate = 4;
 elseif isempty(overSamplingRate), overSamplingRate = 4; end
@@ -167,8 +155,8 @@ while true
             % Test the validity of the detected targets with CFAR method
             % Calculate the criterion values and thresholds in the CFAR
             % test step
-            [T_judgement, Threshold_CUT] = CFAR_1D_alpha(y_r0,...
-                sampledManifold, training_cells, alpha_set, omegaList_new);
+            [T_judgement, Threshold_CUT] = CFARtr_1D(y_r0,...
+                sampledManifold, training_cells, alpha_set);
 
             % collect the calculation result
             Tarray_judgement(kidx) = T_judgement;
@@ -180,8 +168,8 @@ while true
     else
         % Consider the cases where $K = 1$ or $K = 0$
         y_r_det = y_r + A * gainList;
-        [T_judgement, Threshold_CUT] = CFAR_1D_alpha(y_r_det,...
-            sampledManifold, training_cells, alpha_set, omegaList);
+        [T_judgement, Threshold_CUT] = CFARtr_1D(y_r_det,...
+            sampledManifold, training_cells, alpha_set);
 
         Tarray_judgement = T_judgement;
         Threshold_collect = Threshold_CUT;
@@ -214,8 +202,8 @@ while true
         % If all the targets are valid in the result list and the number
         % of targets in the result list is smaller the K_max, we will test
         % the residaul to find whether there exists targets.
-        [T_judgement, Threshold_CUT] = CFAR_1D_alpha(y_r, ...
-            sampledManifold, training_cells, alpha_set, omegaList);
+        [T_judgement, Threshold_CUT] = CFARtr_1D(y_r, ...
+            sampledManifold, training_cells, alpha_set);
 
         if T_judgement > 0 && (Khat < K_max)
             % detect the new target and refine it
