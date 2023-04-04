@@ -7,14 +7,14 @@
 clc; clear; close all;
 
 rng(5);
-MC = 5;
+MC = 3000;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
 K = 16;
 sigma_n = 1;
 S_snap = 1;
-SNR = 28;
+SNR = 22;
 
 M = Nx;
 Smat_com = eye(M);
@@ -29,15 +29,18 @@ N_r = 60;
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
 
-u_vecall = [0; 1; 2; 4; 6; 8; 10];
+u_vecall = [0; 2; 4; 6; 8; 10];
 length_variable = length(u_vecall);
 
 % statistical variable initialize
 Falsemat_tau = zeros(MC, length_variable);
-Falsemat_CA = zeros(MC, length_variable);
-
 Detectmat_tau = zeros(MC, length_variable);
+
+Falsemat_CA = zeros(MC, length_variable);
 Detectmat_CA = zeros(MC, length_variable);
+
+Falsemat_VALSE = zeros(MC, length_variable);
+Detectmat_VALSE = zeros(MC, length_variable);
 
 % Mento Carlo method
 tic;
@@ -63,6 +66,15 @@ for u_idx = 1 : length_variable
         omegavec_CA, gainvec_CA, Nx);
         Falsemat_CA(mc_idx, u_idx) = resultstruct_CA.False_Eve;
         Detectmat_CA(mc_idx, u_idx) = resultstruct_CA.Detect_Eve;
+
+        y_full = exp(1j * (0:(Nx-1)).' * omega_true.') / sqrt(Nx) * gain_true;
+        out_VALSE = MVALSE_best(y, (0 : (Nx - 1))', 2, y_full);
+        omegaList_VALSE = wrapTo2Pi(out_VALSE.freqs);
+        gainList_VALSE = out_VALSE.amps;
+        resultstruct_VALSE = False_Detection(omega_true, gain_true,...
+        omegaList_VALSE, gainList_VALSE, Nx);
+        Falsemat_VALSE(mc_idx, u_idx) = resultstruct_VALSE.False_Eve;
+        Detectmat_VALSE(mc_idx, u_idx) = resultstruct_VALSE.Detect_Eve;
     end
 end
 
@@ -77,11 +89,15 @@ Detectrate_tau = mean(Detectmat_tau);
 Falserate_CA = mean(Falsemat_CA);
 Detectrate_CA = mean(Detectmat_CA);
 
-% if MC > 100
-%     filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PFAvsSigmavar.mat'];
-%     save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_SNR',...
-%     'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
-% end
+Falserate_VALSE = mean(Falsemat_VALSE);
+Detectrate_VALSE = mean(Detectmat_VALSE);
+
+if MC > 100
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PDvsSNR.mat'];
+    save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_variable',...
+    'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA', ...
+    'Falsemat_VALSE', 'Detectmat_VALSE');
+end
 
 % plot the result
 lw = 2;
@@ -90,18 +106,35 @@ msz = 8;
 
 
 figure(1)
-plot(u_vecall, P_oe * ones(1, length_variable), '--k', 'Linewidth', lw)
+semilogy(u_vecall, P_oe * ones(1, length_variable) / Nx, '--k', 'Linewidth', lw)
 hold on;
-plot(u_vecall, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(u_vecall, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
+semilogy(u_vecall, Falserate_VALSE / Nx, '-md', 'Linewidth', lw, 'Markersize', msz)
+semilogy(u_vecall, Falserate_tau / Nx, '-ro', 'Linewidth', lw, 'Markersize', msz)
+semilogy(u_vecall, Falserate_CA / Nx, '-b+', 'Linewidth', lw, 'Markersize', msz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01 / N$', 'VALSE', 'NOMP', ...
     'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('Strength of Noise fluctuation u (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
+
 figure(2)
-plot(u_vecall, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
+plot(u_vecall, Detectrate_VALSE, '-md', 'Linewidth', lw, 'Markersize', msz)
+plot(u_vecall, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 plot(u_vecall, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('Strength of Noise Fluctuation u (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+
+figure(3)
+plot(u_vecall, P_oe * ones(1, length_variable) / Nx, '--k', 'Linewidth', lw)
+hold on;
+plot(u_vecall, Falserate_VALSE / Nx, '-md', 'Linewidth', lw, 'Markersize', msz)
+plot(u_vecall, Falserate_tau / Nx, '-ro', 'Linewidth', lw, 'Markersize', msz)
+plot(u_vecall, Falserate_CA / Nx, '-b+', 'Linewidth', lw, 'Markersize', msz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01 / N$', 'VALSE', 'NOMP', ...
+    'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('Strength of Noise fluctuation u (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylim([0, 4e-4])
+
+

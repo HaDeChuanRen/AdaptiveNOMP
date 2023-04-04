@@ -7,16 +7,15 @@
 clc; clear; close all;
 
 rng(8);
-MC = 300;
+MC = 2000;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
 K = 16;
 sigma_n = 1;
 S_snap = 1;
-% SNR = 28;
-SNRvec_all = 16 : 1 : 24;
-length_variable = length(SNRvec_all);
+SNR = 24;
+mu_sigma = 1;
 
 M = Nx;
 Smat_com = eye(M);
@@ -54,7 +53,7 @@ for sp_idx = 1 : length_variable
 
         omega_true = zeros(K, 1);
         omega_min = 2 * pi / Nx;
-        sigma_vec = sigma_n * exprnd(1, Nx, S_snap);
+        sigma_vec = sigma_n * exprnd(mu_sigma, [Nx, S_snap]);
         y_noise = sqrt(sigma_vec / 2) .* (randn(Nx, S_snap) + ...
             1j * randn(Nx, S_snap));
         omega_true(1) = pi * (2 * rand - 1);
@@ -100,9 +99,8 @@ Falserate_CA = mean(Falsemat_CA);
 Detectrate_CA = mean(Detectmat_CA);
 
 if MC > 100
-    filename_now = [datestr(now, 30), '_mc', num2str(MC), ...
-        '_SigmavecinExprnd.mat'];
-    save(filename_now, 'Nx', 'P_oe', 'K', 'SNRvec_all', 'length_variable',...
+    filename_now = [datestr(now, 30), '_mc', num2str(MC), '_PFAvsSigmavar.mat'];
+    save(filename_now, 'Nx', 'P_oe', 'K', 'u_vecall', 'length_variable',...
     'Falsemat_tau', 'Falsemat_CA', 'Detectmat_tau', 'Detectmat_CA');
 end
 

@@ -6,7 +6,7 @@
 clc; clear; close all;
 
 rng(5);
-MC = 5;
+MC = 3000;
 
 % Define Scenario
 Nx = 256; % Length of Sinusoid
@@ -18,13 +18,14 @@ length_SNR = length(SNRvec_all);
 
 M = Nx;
 Smat_com = eye(M);
+omega_min = 2 * pi / Nx;
 
 % algorithm parameters
-K_max = 20;
+K_max = 32;
 P_oe = 0.01;
 CFAR_method = 'CA';
 gamma_oversamping = 4;
-N_r = 60;
+N_r = 50;
 
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
@@ -40,13 +41,28 @@ Detectmat_for = zeros(MC, length_SNR);
 
 % Mento Carlo method
 tic;
+for mc_idx = 1 : MC
+    omega_true = zeros(K, 1);
+    omega_true(1) = pi * (2 * rand - 1);
+    for k = 2 : K
+        th = pi * (2 * rand - 1);
+        while min(abs((wrapToPi(th - omega_true(1 : k - 1))))) < omega_min
+            th = pi * (2*rand - 1);
+        end
+        omega_true(k) = th;
+    end
+    omega_true = wrapTo2Pi(omega_true);
+    noise = sqrt(sigma_n / 2) * (randn(M, S_snap) + 1j*randn(M, S_snap));
+    gain_phi = exp(1j * 2 * pi * rand(K, S_snap));
 
-for sp_idx = 1 : length_SNR
-    SNR = SNRvec_all(sp_idx);
-
-    for mc_idx = 1 : MC
-        handle_waitbar = waitbar(((sp_idx - 1) * MC + mc_idx) / (MC * length_SNR));
-        [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_n, Smat_com);
+    for sp_idx = 1 : length_SNR
+        SNR = SNRvec_all(sp_idx);
+        handle_waitbar = waitbar(((mc_idx - 1) * length_SNR + sp_idx) / (MC * length_SNR));
+        gain_true = bsxfun(@times, sqrt(sigma_n) * (10.^(SNR / 20)), gain_phi);  % K*T
+        % original signal
+        y_full = exp(1j * (0:(Nx-1)).' * omega_true.')/sqrt(Nx) * gain_true;
+        y_noisy = Smat_com * y_full + noise;
+        y = y_noisy;
 
         [omegavec_tau, gainvec_tau, ~] = MNOMP(y, Smat_com, tau_set);
         resultstruct_tau = False_Detection(omega_true, gain_true,...

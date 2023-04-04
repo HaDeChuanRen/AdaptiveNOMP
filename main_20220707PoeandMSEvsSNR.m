@@ -9,7 +9,7 @@ clc; clear; close all;
 
 
 rng(5);
-MC = 5;
+MC = 3000;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
@@ -67,6 +67,14 @@ Detect_CA25_001Poe = zeros(MC, Num_SNR);
 Equal_CA25_001Poe = zeros(MC, Num_SNR);
 Error_ave_CA25_001Poe = zeros(MC, Num_SNR);
 reconErr_CA25_001Poe= zeros(MC, Num_SNR);
+
+Miss_VALSE = zeros(MC, Num_SNR);
+False_VALSE = zeros(MC, Num_SNR);
+Overest_VALSE = zeros(MC, Num_SNR);
+Detect_VALSE = zeros(MC, Num_SNR);
+Equal_VALSE = zeros(MC, Num_SNR);
+Error_ave_VALSE = zeros(MC, Num_SNR);
+reconErr_VALSE= zeros(MC, Num_SNR);
 
 
 
@@ -131,6 +139,18 @@ for mc = 1 : MC
         Miss_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.Miss_Eve;
         reconErr_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.reconErr;
 
+        out_VALSE = MVALSE_best(y, (0 : (N-1))', 2, y_full);
+        omegaList_VALSE = wrapTo2Pi(out_VALSE.freqs);
+        gainList_VALSE = out_VALSE.amps;
+        results_struct_VALSE = False_Detection(omega_true, gain_true,...
+        omegaList_VALSE, gainList_VALSE, N);
+        False_VALSE(mc, sp_idx) = results_struct_VALSE.False_Eve;
+        Overest_VALSE(mc, sp_idx) = results_struct_VALSE.Overest_Eve;
+        Detect_VALSE(mc, sp_idx) = results_struct_VALSE.Detect_Eve;
+        Equal_VALSE(mc, sp_idx) = results_struct_VALSE.Equal_Eve;
+        Error_ave_VALSE(mc, sp_idx) = results_struct_VALSE.error_ave;
+        Miss_VALSE(mc, sp_idx) = results_struct_VALSE.Miss_Eve;
+        reconErr_VALSE(mc, sp_idx) = out_VALSE.mse(end);
     end
 end
 
@@ -158,6 +178,15 @@ MSEdB_CA25_001Poe = 10 * log10(sum(Error_ave_CA25_001Poe) ./ sum(Equal_CA25_001P
 MSEdB_CA25_001Poe(Equal_rate_CA25_001Poe < 0.3) = nan;
 reconErr_CA25_001Poe_ave = 10 * log10(mean(reconErr_CA25_001Poe));
 
+False_rate_VALSE = mean(False_VALSE);
+Overest_rate_VALSE = mean(Overest_VALSE);
+Detect_rate_VALSE = mean(Detect_VALSE);
+Equal_rate_VALSE = mean(Equal_VALSE);
+Miss_rate_VALSE = mean(Miss_VALSE);
+MSEdB_VALSE = 10 * log10(sum(Error_ave_VALSE) ./ sum(Equal_VALSE));
+MSEdB_VALSE(Equal_rate_VALSE < 0.3) = nan;
+reconErr_VALSE_ave = 10 * log10(mean(reconErr_VALSE));
+
 
 lw = 2;
 fsz = 12;
@@ -176,23 +205,38 @@ msz = 8;
 figure(1);
 plot(SNR_min_all, P_oe001 * ones(1, Num_SNR), '--k','Linewidth',lw)
 hold on;
+plot(SNR_min_all, False_rate_VALSE,'-md','Linewidth', lw,'Markersize', msz)
 plot(SNR_min_all, False_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, False_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
-legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
-    'NOMP-CFAR $(N_r = 50)$', 'Interpreter', 'latex', 'Fontsize', fsz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'VALSE', 'NOMP', ...
+    'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
 ylabel('Measured $\bar{\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
 
-figure(2);
-plot(SNR_min_all, Equal_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
+figure(4);
+semilogy(SNR_min_all, P_oe001 * ones(1, Num_SNR), '--k','Linewidth',lw)
 hold on;
+semilogy(SNR_min_all, False_rate_VALSE,'-md','Linewidth', lw,'Markersize', msz)
+semilogy(SNR_min_all, False_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
+semilogy(SNR_min_all, False_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'VALSE', 'NOMP', ...
+    'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
+xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA}$','Interpreter','latex','Fontsize',fsz)
+
+
+figure(2);
+hold on;
+plot(SNR_min_all, Equal_rate_VALSE,'-md','Linewidth',lw,'Markersize',msz)
+plot(SNR_min_all, Equal_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, Equal_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
 ylabel('Measured ${\rm P}(\hat{K} = K)$','Interpreter','latex','Fontsize',fsz)
 
 figure(3);
-plot(SNR_min_all, Detect_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
+plot(SNR_min_all, Detect_rate_VALSE,'-md','Linewidth',lw,'Markersize',msz)
+plot(SNR_min_all, Detect_rate_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, Detect_rate_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
 ylabel('Measured $\bar{\rm P}_{\rm D}$','Interpreter','latex','Fontsize',fsz)
@@ -202,6 +246,7 @@ ylabel('Measured $\bar{\rm P}_{\rm D}$','Interpreter','latex','Fontsize',fsz)
 figure(5);
 plot(SNR_min_all, CRB_omega,'--k','Linewidth',lw)
 hold on;
+plot(SNR_min_all, MSEdB_VALSE,'-md','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, MSEdB_tau_001Poe,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, MSEdB_CA25_001Poe,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
@@ -216,8 +261,9 @@ legend('CRB','Fontsize',fsz)
 % ylabel('measured ${\rm P}_{\rm M}$','Interpreter','latex','Fontsize',fsz)
 
 figure(7);
-plot(SNR_min_all, reconErr_tau_001Poe_ave,'-ro','Linewidth',lw,'Markersize',msz)
 hold on;
+plot(SNR_min_all, reconErr_VALSE_ave,'-md','Linewidth',lw,'Markersize',msz)
+plot(SNR_min_all, reconErr_tau_001Poe_ave,'-ro','Linewidth',lw,'Markersize',msz)
 plot(SNR_min_all, reconErr_CA25_001Poe_ave,'-b+','Linewidth',lw,'Markersize',msz)
 xlabel('${\rm SNR}$ (dB)','Interpreter','latex','Fontsize',fsz)
 ylabel('NMSE($\hat{\mathbf{z}}$) (dB)','Interpreter','latex','Fontsize',fsz)
@@ -229,7 +275,9 @@ if MC > 100
     'False_tau_001Poe', 'Overest_tau_001Poe', 'Detect_tau_001Poe',...
     'Equal_tau_001Poe', 'Miss_tau_001Poe', 'Error_ave_tau_001Poe', 'reconErr_tau_001Poe',...
     'False_CA25_001Poe', 'Overest_CA25_001Poe', 'Detect_CA25_001Poe',...
-    'Equal_CA25_001Poe', 'Miss_CA25_001Poe', 'Error_ave_CA25_001Poe', 'reconErr_CA25_001Poe');
+    'Equal_CA25_001Poe', 'Miss_CA25_001Poe', 'Error_ave_CA25_001Poe', 'reconErr_CA25_001Poe', ...
+    'False_VALSE', 'Overest_VALSE', 'Detect_VALSE',...
+    'Equal_VALSE', 'Miss_VALSE', 'Error_ave_VALSE', 'reconErr_VALSE');
 end
 
 

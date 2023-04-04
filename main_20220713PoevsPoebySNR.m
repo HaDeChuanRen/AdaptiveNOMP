@@ -8,7 +8,7 @@ set(0,'DefaultAxesFontSize',14);
 
 
 rng(5);
-MC = 10;
+MC = 3000;
 
 % Define Scenario
 N = 256; % Length of Sinusoid

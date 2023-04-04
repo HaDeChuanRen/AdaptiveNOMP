@@ -3,7 +3,8 @@ clc; clear; close all;
 
 % read the ADC data
 
-orginal_path = 'C:\study\202206MNOMP_CFAR\4program\Matlab\data\20220506exp';
+orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4program\Matlab\data\20220506exp\20220506exp';
+
 exp_type = '\02people2';
 exp_serial = '\01';
 N_start = 1;

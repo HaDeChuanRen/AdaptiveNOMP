@@ -41,7 +41,6 @@ function results_struct = False_Detection(omega_true, gain_true, ...
     False_vec = min(Dist_omega) > (0.5 * omega_min) ^ 2;
     results_struct.False_Eve = sum(False_vec);
 
-
     if Khat > K
         results_struct.Overest_Eve = 1;
     elseif Khat == K
