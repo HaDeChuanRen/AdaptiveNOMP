@@ -55,7 +55,7 @@ y_r = y;
 residueList = [y_r(:)' * y_r(:)];
 
 figure;
-for cnt_k = 1 : K
+for cnt_k = 1 : K - 1
     [omega_new, gain_new, y_r, ~] = detectNew(y_r, sampledManifold);
 
     for i = 1:R_s
@@ -106,7 +106,7 @@ for cnt_k = 1 : K
     residueList = [residueList; residue_new];
 
     yr_fft = fft(y_r);
-    title_fig = ['$\hat{K}$ = ', num2str(K + cnt_k)];
+    title_fig = ['$\hat{K}$ = ', num2str(K + cnt_k - 1)];
     subplot(sqrt(K), sqrt(K), cnt_k);
     qqplot(real(yr_fft));
     title(title_fig, 'Interpreter', 'Latex');

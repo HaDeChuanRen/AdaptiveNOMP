@@ -179,7 +179,11 @@ while true
         end
     else
         % Consider the cases where $K = 1$ or $K = 0$
-        y_r_det = y_r + A * gainList;
+        if Khat == 1
+            y_r_det = y_r + A * gainList;
+        elseif Khat == 0
+            y_r_det = y_r;
+        end
         [T_judgement, Threshold_CUT] = CFAR_1D_alpha(y_r_det,...
             sampledManifold, training_cells, alpha_set, omegaList);
 

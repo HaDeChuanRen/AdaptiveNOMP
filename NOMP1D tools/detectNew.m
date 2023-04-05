@@ -31,8 +31,8 @@ if sampledManifold.is_eye
     gains  = fft(y, R)/sqrt(N);   % R *T matrix
     
     if sampledManifold.ant_idx(1)~=0
-        gains = bsxfun(@times,gains,exp(-1j*sampledManifold.coarseOmega(:)*...
-            sampledManifold.ant_idx(1)));
+        gains = bsxfun(@times, gains, exp(-1j * ...
+        sampledManifold.coarseOmega(:) * sampledManifold.ant_idx(1)));
 %         gains = gains.*exp(-1j*sampledManifold.coarseOmega(:)*...
 %             sampledManifold.ant_idx(1));
     end
@@ -53,7 +53,7 @@ gain = gains(IDX,:);
 % compute the response corresponding to the
 % current estimate of the sinusoid
 if sampledManifold.is_eye
-    x = exp(1j*sampledManifold.ant_idx * omega)...
+    x = exp(1j * sampledManifold.ant_idx * omega)...
         /sqrt(sampledManifold.length);
 else
     x = sampledManifold.map_IfftMat(:,IDX);

@@ -29,7 +29,7 @@ N_max = ceil(tau_max * Fs);
 K_targets = 4;
 sigma_n = 1;
 % SNR_all = 5 * rand(1, K_targets) + 1;
-SNR_dB = 16;
+SNR_dB = 36;
 % gain_alltargets = randn(K_targets, 1) + 1j * randn(K_targets, 1);
 gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(K_targets, 1));
 % gain_allK = zeros(1, K_targets);
@@ -88,15 +88,15 @@ p_oe = 1e-2;
 N_r = 40;
 S = eye(Nx);
 alpha_hat = alpha_Poe(p_oe, Nx, N_r);
-% [omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
-% MNOMP_CFAR_alpha(y_vec, S, alpha_hat, N_r, K_max);
-[omegaList_CFAR, gainListCFAR, ~, Threshold_collect] = ...
-MNOMP_CFARtr(y_vec, S, alpha_hat, N_r, K_max);
+[omegaList_CFAR, gainListCFAR, ~, Threshold_collect] =...
+MNOMP_CFAR_alpha(y_vec, S, alpha_hat, N_r, K_max);
+% [omegaList_CFAR, gainListCFAR, ~, Threshold_collect] = ...
+% MNOMP_CFARtr(y_vec, S, alpha_hat, N_r, K_max);
 
-% S_snap = 1;
-% tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / Nx), 2 * S_snap) / 2;
-% [omegaList_tau, gainList_tau, y_residue_matrix] =...
-% MNOMP(y_vec, S, tau, K_max);
+S_snap = 1;
+tau = sigma_n * chi2inv((1 - p_oe) ^ (1 / Nx), 2 * S_snap) / 2;
+[omegaList_tau, gainList_tau, y_residue_matrix] =...
+MNOMP(y_vec, S, tau, K_max);
 
 
 

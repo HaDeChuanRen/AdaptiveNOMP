@@ -1,13 +1,13 @@
-function [omegaList, gainList, y_r, A] = solveLeastSquares(y , omegaList, ...
+function [omegaList, gainList, y_r, A] = solveLeastSquares(y, omegaList, ...
     S, ant_idx)
 % SUMMARY:
 %    Reestimates all gains wholesale
 N = length(ant_idx);
-if isempty(S) % is this an identity matrix 
+if isempty(S) % is this an identity matrix
     A = exp(1j*ant_idx*omegaList.')/sqrt(N);
 else
     A = S * exp(1j*ant_idx*omegaList.')/sqrt(N);
-end   
+end
 
 % update gains
 gainList = (A'*A)\(A'*y);

@@ -2,7 +2,7 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4program\Matlab\data\20220506exp\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
 exp_type = '\07multiple';
 exp_serial = '\01';
 
@@ -54,8 +54,8 @@ N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 alpha_set2D = alpha_PoebyS(P_oe2D, NM_num, N_r2D);
 tic;
 [omegaList, gainList, ~, Threshold_collect] = ...
-NOMP2D_CFAR(ymat, alpha_set2D, N_r2D, K_max);
-toc;
+NOMP2D_fast(ymat, alpha_set2D, N_r2D, K_max);
+time_alpha = toc;
 
 
 % NOMP2D_CFAR(y_matrix, p_fa_CFAR, guard_training_size2D, K_max);
@@ -129,7 +129,8 @@ for n_idx = 1 : Nx
 end
 
 [peak_grid, Threshold_CUT, sigma_hat] = cfar_detector2D(prob_ind_ext, cut_idx);
-toc;
+time_fft = toc;
+
 alpha_fft = mean(Threshold_CUT ./ sigma_hat);
 peak_idx = find(peak_grid == 1);
 peak_idx2D = cut_idx(:, peak_idx) - [Nx; My];

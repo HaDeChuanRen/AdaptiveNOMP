@@ -29,10 +29,10 @@ tau_max = 2 * range_max / c;
 N_max = ceil(tau_max * Fs);
 
 % the status of targets
-K_targets = 4;
+K_targets = 1;
 sigma_n = 1;
 % SNR_all = 5 * rand(1, K_targets) + 1;
-SNR_dB = 16;
+SNR_dB = 30;
 % gain_alltargets = randn(K_targets, 1) + 1j * randn(K_targets, 1);
 gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(K_targets, 1));
 % gain_allK = zeros(1, K_targets);

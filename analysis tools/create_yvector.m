@@ -5,6 +5,7 @@ function [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_n, Sm
     omega_true = zeros(K, 1);
     omega_min = 2 * pi / Nx;
 
+
     y_noise = sqrt(sigma_n / 2) * (randn(My, S_snap) + 1j*randn(My, S_snap));
 
     if K > 0
@@ -22,6 +23,8 @@ function [y, omega_true, gain_true] = create_yvector(K, S_snap, SNR, sigma_n, Sm
         y_full = exp(1j * (0:(Nx - 1)).' * omega_true.') / sqrt(Nx) * gain_true;
         y = Smat_com * y_full + y_noise;
     else
+        gain_true = [];
+        omega_true = [];
         y = y_noise;
     end
 end

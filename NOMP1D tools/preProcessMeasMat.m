@@ -27,7 +27,7 @@ M = size(S,1);
 N = size(S,2);
 
 sampledManifold.length = N;
-R = round(overSamplingRate*N);
+R = round(overSamplingRate * N);
 
 sampledManifold.coarseOmega = 2*pi*(0:(R-1))/R;  % omegaCoarse
 

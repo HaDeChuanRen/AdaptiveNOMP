@@ -1,6 +1,5 @@
-% last update: 2022.7.23
-% simulation of detection rate changing versus the number of observations
-% in compressive scene
+% last update: 2022.12.22
+% Compare the NOMP-CFAR method with NOMP-CFAR with traditional CFAR window
 
 
 clc; clear; close all;
@@ -83,6 +82,8 @@ if MC > 100
     'Falsemat_tr', 'Detectmat_tr');
 end
 
+% load('20221225T010203_mc3000_trvsback.mat')
+
 % after care
 Falserate_tau = mean(Falsemat_tau);
 Detectrate_tau = mean(Detectmat_tau);
@@ -99,21 +100,22 @@ Detectrate_tr = mean(Detectmat_tr);
 
 % plot the result
 lw = 2;
-fsz = 12;
+fsz = 10;
 msz = 8;
 
 
 figure(1)
 plot(SNRvec_all, P_oe * ones(1, length_SNR), '--k', 'Linewidth', lw)
 hold on;
-plot(SNRvec_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
-plot(SNRvec_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
-plot(SNRvec_all, Falserate_tr, '-m*', 'Linewidth', lw, 'Markersize', msz)
-legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
-    'NOMP-CFAR', 'NOMP-CFAR (traditonal CFAR)', 'Interpreter', 'latex', ...
-    'Fontsize', fsz)
+plot(SNRvec_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz);
+plot(SNRvec_all, Falserate_tr, '-m*', 'Linewidth', lw, 'Markersize', msz);
+plot(SNRvec_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz);
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP',  ...
+    'NOMP-CFAR (traditonal windows)', 'NOMP-CFAR', 'Interpreter', ...
+    'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', ...
+    'Fontsize', fsz)
 
 figure(2)
 plot(SNRvec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)

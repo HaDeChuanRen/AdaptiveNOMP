@@ -3,7 +3,7 @@ clc; clear; close all;
 
 % read the ADC data
 
-orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4program\Matlab\data\20220506exp\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
 
 exp_type = '\02people2';
 exp_serial = '\01';
@@ -43,13 +43,13 @@ ymat = squeeze(data_cube(N_start : (N_start + Nx - 1), M_start, :));
 % algorithm parameter set
 guard_n = 4;
 guard_l = 0;
-training_n = 8;
+training_n = 12;
 training_l = 1;
 guard_training_size2D = [guard_n, guard_l, training_n, training_l];
 
 
 K_max = 32;
-P_oe2D = 1e-2;
+P_oe2D = 4e-4;
 N_r2D = (2 * training_n + 1) * (2 * training_l + 1) - ...
 (2 * guard_n + 1) * (2 * guard_l + 1);
 % N_r2D = 40;
@@ -61,7 +61,7 @@ tau_set = sigma_set * chi2inv((1 - P_oe2D) ^ (1 / NL_num), 2) / 2;
 % NOMP method analysis
 tic;
 [omega_NOMPCFAR, gain_NOMPCFAR, ~, Threshold_NOMPCFAR] = ...
-NOMP2D_CFAR(ymat, alpha_set2D, N_r2D, K_max, guard_band);
+NOMP2D_fast(ymat, alpha_set2D, N_r2D, K_max, guard_band);
 time_NOMPCFAR = toc;
 
 tic;
@@ -87,14 +87,14 @@ figure;
 plot3(range_NOMPCFAR, theta_NOMPCFAR_deg, 10 * log10(abs(Threshold_NOMPCFAR)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_NOMPCFAR, theta_NOMPCFAR_deg, 20 * log10(abs(gain_NOMPCFAR)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
+stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 
 grid on;
 xlim([0 range_max / 2])
 ylim([-40 40])
 xlabel('Range (m)', 'Fontsize', fsz);
 ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
 zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'Fontsize', fsz)
+legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'True', 'Fontsize', fsz)
 % title('location estimation by Adap-CFAR-NOMP')
 
 omegax_tau = omega_tau(:, 1);
@@ -115,7 +115,7 @@ surf(range_newidx, theta_newidx, (10 * log10(tau_set)) * ones(Lz, Nx),...
 hold on;
 stem3(range_tau, theta_tau_deg, 20 * log10(abs(gain_tau)), ...
 'bo', 'Linewidth', lw, 'Markersize', msz);
-% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
+stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
 grid on;
 xlim([0 range_max / 2])
 ylim([-40 40])
