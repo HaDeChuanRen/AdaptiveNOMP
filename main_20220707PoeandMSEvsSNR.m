@@ -9,7 +9,7 @@ clc; clear; close all;
 
 
 rng(5);
-MC = 3000;
+MC = 30;
 
 % Define Scenario
 N = 256; % Length of Sinusoid
@@ -139,18 +139,18 @@ for mc = 1 : MC
         Miss_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.Miss_Eve;
         reconErr_CA25_001Poe(mc, sp_idx) = results_struct_CA25_001Poe.reconErr;
 
-        out_VALSE = MVALSE_best(y, (0 : (N-1))', 2, y_full);
-        omegaList_VALSE = wrapTo2Pi(out_VALSE.freqs);
-        gainList_VALSE = out_VALSE.amps;
-        results_struct_VALSE = False_Detection(omega_true, gain_true,...
-        omegaList_VALSE, gainList_VALSE, N);
-        False_VALSE(mc, sp_idx) = results_struct_VALSE.False_Eve;
-        Overest_VALSE(mc, sp_idx) = results_struct_VALSE.Overest_Eve;
-        Detect_VALSE(mc, sp_idx) = results_struct_VALSE.Detect_Eve;
-        Equal_VALSE(mc, sp_idx) = results_struct_VALSE.Equal_Eve;
-        Error_ave_VALSE(mc, sp_idx) = results_struct_VALSE.error_ave;
-        Miss_VALSE(mc, sp_idx) = results_struct_VALSE.Miss_Eve;
-        reconErr_VALSE(mc, sp_idx) = out_VALSE.mse(end);
+%         out_VALSE = MVALSE_best(y, (0 : (N-1))', 2, y_full);
+%         omegaList_VALSE = wrapTo2Pi(out_VALSE.freqs);
+%         gainList_VALSE = out_VALSE.amps;
+%         results_struct_VALSE = False_Detection(omega_true, gain_true,...
+%         omegaList_VALSE, gainList_VALSE, N);
+%         False_VALSE(mc, sp_idx) = results_struct_VALSE.False_Eve;
+%         Overest_VALSE(mc, sp_idx) = results_struct_VALSE.Overest_Eve;
+%         Detect_VALSE(mc, sp_idx) = results_struct_VALSE.Detect_Eve;
+%         Equal_VALSE(mc, sp_idx) = results_struct_VALSE.Equal_Eve;
+%         Error_ave_VALSE(mc, sp_idx) = results_struct_VALSE.error_ave;
+%         Miss_VALSE(mc, sp_idx) = results_struct_VALSE.Miss_Eve;
+%         reconErr_VALSE(mc, sp_idx) = out_VALSE.mse(end);
     end
 end
 
@@ -158,6 +158,7 @@ toc;
 delete(handle_waitbar);
 SNR_delta = 0;
 CRB_omega = 10 * log10((6 / (N^2 - 1)) * 10 .^ (- (SNR_min_all + SNR_delta / 2) / 10));
+% CRB_omega = 10 * log10(6 / (N^2 - 1)) - (SNR_min_all + SNR_delta / 2)
 Num_SNR = length(SNR_min_all);
 
 False_rate_tau_001Poe = mean(False_tau_001Poe);

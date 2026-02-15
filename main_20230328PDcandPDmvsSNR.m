@@ -7,10 +7,10 @@ addpath('analysis tools\')
 addpath('NOMP1D tools\')
 
 rng(5);
-MC = 3000;
+MC = 300;
 
 % Define Scenario
-Nx = 256; % Length of Sinusoid
+Nx = 1024; % Length of Sinusoid
 K = 1;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 S_snap = 1;
@@ -24,7 +24,7 @@ Smat_com = eye(My);
 K_max = 3;
 P_fa = 0.01;
 gamma_oversamping = 4;
-num_train = 30;
+num_train = 100;
 N_r = 2 * num_train;
 num_guard = 4;
 
@@ -32,7 +32,7 @@ tau_set = sigma_n * chi2inv((1 - P_fa) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_fa, Nx, N_r, S_snap);
 
 
-delta_all = [0; 0.25; 0.5];
+delta_all = [0; 0.25; 0.49];
 
 length_delta = length(delta_all);
 % length_delta = 1;
@@ -127,32 +127,35 @@ PDvec_alpha = squeeze(mean(Detectmat_alpha, 1));
 PDvec_FFT = squeeze(mean(Detectmat_FFT, 1));
 
 lw = 2;
-fsz = 12;
+fsz = 10;
 msz = 8;
 
 figure;
 hold on;
 
-plot(SNRvec_all, PDvec_cal(:, 1), '--k+', 'Linewidth', lw);
+plot(SNRvec_all, PDvec_cal(:, 1), '--k+', 'Linewidth', lw, ...
+    'Markersize', msz);
 plot(SNRvec_all, PDvec_FFT(:, 1), '-b*', 'Linewidth', lw, ...
     'Markersize', msz);
 plot(SNRvec_all, PDvec_alpha(:, 1), '-ro', 'Linewidth', lw, 'Markersize', msz);
 
-plot(SNRvec_all, PDvec_cal(:, 2), '--kx', 'Linewidth', lw);
+plot(SNRvec_all, PDvec_cal(:, 2), '--kx', 'Linewidth', lw, ...
+    'Markersize', msz);
 plot(SNRvec_all, PDvec_FFT(:, 2), '-b+', 'Linewidth', lw, ...
     'Markersize', msz);
 plot(SNRvec_all, PDvec_alpha(:, 2), '-r^', 'Linewidth', lw, 'Markersize', msz);
 
-plot(SNRvec_all, PDvec_cal(:, 3), '--kd', 'Linewidth', lw);
+plot(SNRvec_all, PDvec_cal(:, 3), '--kd', 'Linewidth', lw, ...
+    'Markersize', msz);
 plot(SNRvec_all, PDvec_FFT(:, 3), '-bo', 'Linewidth', lw, ...
     'Markersize', msz);
 plot(SNRvec_all, PDvec_alpha(:, 3), '-rv', 'Linewidth', lw, 'Markersize', msz);
 
-legend('theory ($\delta = 0$)', 'FFT ($\delta = 0$)', ...
-'NOMP-CFAR ($\delta = 0$)', 'theory ($\delta = 0.25$)', ...
+legend('eq.(41) ($\delta = 0$)', 'FFT ($\delta = 0$)', ...
+'NOMP-CFAR ($\delta = 0$)', 'eq.(41) ($\delta = 0.25$)', ...
 'FFT ($\delta = 0.25$)', 'NOMP-CFAR ($\delta = 0.25$)', ...
-'theory ($\delta = 0.5$)', 'FFT ($\delta = 0.5$)', ...
-'NOMP-CFAR ($\delta = 0.5$)', 'Interpreter', 'latex', 'Fontsize', fsz);
+'eq.(41) ($\delta = 0.49$)', 'FFT ($\delta = 0.49$)', ...
+'NOMP-CFAR ($\delta = 0.49$)', 'Interpreter', 'latex', 'Fontsize', fsz);
 ylabel('$\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 

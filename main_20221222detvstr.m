@@ -82,7 +82,7 @@ if MC > 100
     'Falsemat_tr', 'Detectmat_tr');
 end
 
-% load('20221225T010203_mc3000_trvsback.mat')
+load('20221225T010203_mc3000_trvsback.mat')
 
 % after care
 Falserate_tau = mean(Falsemat_tau);
@@ -110,19 +110,25 @@ hold on;
 plot(SNRvec_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz);
 plot(SNRvec_all, Falserate_tr, '-m*', 'Linewidth', lw, 'Markersize', msz);
 plot(SNRvec_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz);
-legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP',  ...
-    'NOMP-CFAR (traditonal windows)', 'NOMP-CFAR', 'Interpreter', ...
-    'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', ...
+ylabel('$\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', ...
     'Fontsize', fsz)
+legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'Interpreter', 'latex', 'Fontsize', fsz)
+% legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP',  ...
+%     'NOMP-CFAR (traditonal windows)', 'NOMP-CFAR', 'Interpreter', ...
+%     'latex', 'Fontsize', fsz)
+% xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
+% ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', ...
+%     'Fontsize', fsz)
 
 figure(2)
 plot(SNRvec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 hold on;
-plot(SNRvec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 plot(SNRvec_all, Detectrate_tr, '-m*', 'Linewidth', lw, 'Markersize', msz)
+plot(SNRvec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('$\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+legend('NOMP', 'NOMP-CFAR (traditional)', 'NOMP-CFAR', 'Interpreter', 'latex', ...
+   'Fontsize', fsz)
 
 

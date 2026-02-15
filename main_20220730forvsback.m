@@ -123,9 +123,9 @@ plot(SNRvec_all, Falserate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
 plot(SNRvec_all, Falserate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 plot(SNRvec_all, Falserate_for, '-m*', 'Linewidth', lw, 'Markersize', msz)
 legend('$\bar{\rm P}_{\rm FA} = 0.01$', 'NOMP', ...
-    'NOMP-CFAR', 'NOMP-CFAR (forward)', 'Interpreter', 'latex', 'Fontsize', fsz)
+    'NOMP-CFAR', 'NOMP-CFAR ($\rm{前向}$)', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel('${\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 figure(2)
 plot(SNRvec_all, Detectrate_tau, '-ro', 'Linewidth', lw, 'Markersize', msz)
@@ -133,6 +133,6 @@ hold on;
 plot(SNRvec_all, Detectrate_CA, '-b+', 'Linewidth', lw, 'Markersize', msz)
 plot(SNRvec_all, Detectrate_for, '-m*', 'Linewidth', lw, 'Markersize', msz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylabel('Measured $\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
+ylabel(' ${\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 
 

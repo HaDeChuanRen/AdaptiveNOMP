@@ -14,15 +14,15 @@ Nx = 256; % Length of Sinusoid
 K = 1;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 S_snap = 1;
-SNRvec_all = 6 : 2 : 20;
+SNRvec_all = 14 : 2 : 20;
 length_SNR = length(SNRvec_all);
 
 
 % algorithm parameters
 P_fa = 0.01;
-num_train = 60;
+num_train = 30;
 N_r = 2 * num_train;
-num_guard = 30;
+num_guard = 3;
 
 tau_set = sigma_n * chi2inv((1 - P_fa) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_fa, Nx, N_r, S_snap);
@@ -35,7 +35,7 @@ gamma_oversamping = 4;
 
 
 
-omega_true = 2 * pi / Nx * (Nx / 2 - 0.5);
+omega_true = 2 * pi / Nx * (Nx / 2 - 0.2);
 % omega_true = 2 * pi * rand();
 cutvec_idx = round(Nx * omega_true / (2 * pi)) + 1;
 
@@ -59,11 +59,11 @@ tic;
 for sp_idx = 1 : length_SNR
     hwaitbar = waitbar((sp_idx - 1) / length_SNR);
     SNR = SNRvec_all(sp_idx);
-    fun_QT = @(T_var) exp(log(marcumq(beta_omega * sqrt(2 * 10 ^ (SNR / 10)), sqrt(2 * T_var))) + (N_r - 1) * log(T_var) - N_r * T_var / alpha_set - ...
-        sum(log(1 : (N_r - 1))) + N_r * log(N_r / alpha_set));
-    PDvec_cal(sp_idx) = integral(fun_QT, 0, Inf);
+    % fun_QT = @(T_var) exp(log(marcumq(beta_omega * sqrt(2 * 10 ^ (SNR / 10)), sqrt(2 * T_var))) + (N_r - 1) * log(T_var) - N_r * T_var / alpha_set - ...
+    %     sum(log(1 : (N_r - 1))) + N_r * log(N_r / alpha_set));
+    % PDvec_cal(sp_idx) = integral(fun_QT, 0, Inf);
     delta_y = 2 * (10 .^ (SNR / 10)) * (beta_omega ^ 2);
-    PDvec_cal_ncf(sp_idx) = ncfcdf(alpha_set, 2, 2 * N_r, delta_y, 'upper');
+    PDvec_cal(sp_idx) = ncfcdf(alpha_set, 2, 2 * N_r, delta_y, 'upper');
     gainvec_true = sqrt(sigma_n) * (10 .^ (SNR / 20)) * exp(1j * 2 * pi * ...
         rand(K, 1)) / sqrt(Nx);
     ymat_all = gainvec_true .* y_full + sqrt(sigma_n / 2) * (randn(Nx, MC)...
@@ -73,9 +73,8 @@ for sp_idx = 1 : length_SNR
     peakvec = ymat_absfft(cutvec_idx, :);
     % [peakvec, ~] = max(ymat_absfft);
 
-    train_set = ymat_absfft(train_all,:);
-%     train_set_data = sqrt(sigma_n/2)*(randn(N_r, MC)+1j*randn(N_r,MC));
-%     train_set = abs(train_set_data).^2;
+
+    train_set = ymat_absfft(train_all, :);
     simga_vec = mean(train_set);
     Detectmat_FFT(:, sp_idx) = (peakvec > alpha_set * simga_vec)';
 
@@ -84,17 +83,19 @@ for sp_idx = 1 : length_SNR
         hwaitbar = waitbar(((sp_idx - 1) * MC + mc_idx) / (MC * length_SNR));
         gain_true = bsxfun(@times, sqrt(sigma_n) * (10 .^ (SNR / 20)), ...
             exp(1j * 2 * pi * rand(K, S_snap)));  % K* S_snap
-        y_full = exp(1j * (0 : (Nx - 1)).' * omega_true.') / sqrt(Nx) * ...
-            gain_true;
-        y = y_full + sqrt(sigma_n / 2) * (randn(Nx, S_snap) + ...
-            1j * randn(Nx, S_snap));
+        % y_full = exp(1j * (0 : (Nx - 1)).' * omega_true.') / sqrt(Nx) * ...
+        %     gain_true;
+        % y_full + sqrt(sigma_n / 2) * (randn(Nx, S_snap) + ...
+        %     1j * randn(Nx, S_snap));
 
+        y = ymat_all(:, mc_idx);
         [omegavec_alpha, gainvec_alpha, ~] = ...
             MNOMP_CFAR_alpha(y, eye(Nx), alpha_set, N_r, K_max);
         resultstruct_alpha = False_Detection(omega_true, gain_true, ...
             omegavec_alpha, gainvec_alpha, Nx);
         Detectmat_alpha(mc_idx, sp_idx) = resultstruct_alpha.Detect_Eve;
     end
+
 end
 
 time_MC = toc
@@ -106,8 +107,8 @@ if time_MC > 600
     'PDvec_cal', 'Detectmat_FFT', 'Detectmat_alpha');
 end
 
-PDvec_alpha = mean(Detectmat_alpha, 1);
-PDvec_FFT = mean(Detectmat_FFT, 1);
+PDvec_alpha = squeeze(mean(Detectmat_alpha, 1));
+PDvec_FFT = squeeze(mean(Detectmat_FFT, 1));
 
 lw = 2;
 fsz = 12;
@@ -119,7 +120,7 @@ hold on;
 % plot(SNRvec_all, PDvec_cal_ncf, '--m*', 'Linewidth', lw);
 plot(SNRvec_all, PDvec_FFT, '-bo', 'Linewidth', lw, 'Markersize', msz);
 plot(SNRvec_all, PDvec_alpha, '-r+', 'Linewidth', lw, 'Markersize', msz);
-legend('calculated (int)', 'calculated (ncf)', 'measured (FFT)', ...
+legend('calculated (ncf)', 'measured (FFT)', 'measured (NOMP-CFAR)', ...
     'Interpreter', 'latex', 'Fontsize', fsz);
 ylabel('$\bar{\rm P}_{\rm D}$', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('${\rm SNR}$ (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)

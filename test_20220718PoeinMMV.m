@@ -90,7 +90,7 @@ plot(alpha_all, 1 - Poe_NOMPSmedium, 'm--', 'Linewidth', lw, 'Markersize', msz);
 % plot(alpha_all, Poe_alpha(:, 3), 'c', 'Linewidth', lw, 'Markersize', msz);
 % plot(alpha_all, Poe_NOMPShigh, 'c--', 'Linewidth', lw, 'Markersize', msz);
 % , 'S = 100 (CA)', 'S = 100 (NOMP)'
-legend('NOMP-CFAR (S = 1)', 'NOMP (S = 1)', 'CFAR approx. (S = 1)', ...
+legend('NOMP-CFAR (S = 1)', 'NOMP (S = 1)', 'CFAR近似 (S = 1)', ...
 'NOMP-CFAR (S = 10)', 'NOMP (S = 10)', 'NOMP-CFAR (S = 50)', 'NOMP (S = 50)');
 xlabel('$\alpha$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('$1 - \bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
@@ -103,8 +103,8 @@ plot(alpha_all, 1 - Poe_NOMPS1, 'r--', 'Linewidth', lw, 'Markersize', msz);
 plot(alpha_all, 1 - PFA_CFARappS1, 'r-.', 'Linewidth', lw, 'Markersize', msz)
 xlabel('$\alpha$', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('$1 - \bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylim([0.9 1])
-
+ylim([0.8 1])
+xlim([6 11.5])
 
 %  Poe_NOMPS1 PFA_CFARappS1 Poe_alpha(:, 2)
 [~, alphamin_idx] = min(abs(Poe_alphaS1 - 0.01));

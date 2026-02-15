@@ -2,11 +2,9 @@ clc; clear; close all;
 
 
 % read the ADC data
-
-orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
-
-exp_type = '\02people2';
-exp_serial = '\01';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220904exp'; % 20220506exp
+exp_type = '';%\07multiple 
+exp_serial = '\04';% 01
 N_start = 1;
 M_start = 17; %17 1850
 % L_start = 1;
@@ -49,7 +47,7 @@ guard_training_size2D = [guard_n, guard_l, training_n, training_l];
 
 
 K_max = 32;
-P_oe2D = 4e-4;
+P_oe2D = 9e-2;
 N_r2D = (2 * training_n + 1) * (2 * training_l + 1) - ...
 (2 * guard_n + 1) * (2 * guard_l + 1);
 % N_r2D = 40;
@@ -87,14 +85,19 @@ figure;
 plot3(range_NOMPCFAR, theta_NOMPCFAR_deg, 10 * log10(abs(Threshold_NOMPCFAR)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_NOMPCFAR, theta_NOMPCFAR_deg, 20 * log10(abs(gain_NOMPCFAR)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 
 grid on;
-xlim([0 range_max / 2])
+xlim([0 26])
 ylim([-40 40])
-xlabel('Range (m)', 'Fontsize', fsz);
-ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
-zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'True', 'Fontsize', fsz)
+xlabel('距离 (m)', 'Fontsize', fsz);
+ylabel('方位角（°）', 'Interpreter','latex', 'Fontsize', fsz);
+zlabel('幅值 (dB)', 'Fontsize', fsz)
+legend('阈值 (NOMP-CFAR)', '检测点 (NOMP-CFAR)', '真实值', 'Fontsize', fsz)
+
+% xlabel('Range (m)', 'Fontsize', fsz);
+% ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
+% zlabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Threshold (NOMP-CFAR)', 'Amplitude (NOMP-CFAR)', 'True', 'Fontsize', fsz)
 % title('location estimation by Adap-CFAR-NOMP')
 
 omegax_tau = omega_tau(:, 1);
@@ -115,14 +118,18 @@ surf(range_newidx, theta_newidx, (10 * log10(tau_set)) * ones(Lz, Nx),...
 hold on;
 stem3(range_tau, theta_tau_deg, 20 * log10(abs(gain_tau)), ...
 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 'True',
+% stem3(range_true, theta_true, amp_true, ':.m', 'Linewidth', lw); 
 grid on;
-xlim([0 range_max / 2])
+xlim([0 26])
 ylim([-40 40])
-xlabel('Range (m)', 'Fontsize', fsz);
-ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
-zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'Fontsize', fsz)
+xlabel('距离 (m)', 'Fontsize', fsz);
+ylabel('方位角（°）', 'Interpreter','latex', 'Fontsize', fsz);
+zlabel('幅值 (dB)', 'Fontsize', fsz)
+legend('阈值 (NOMP)', '检测点 (NOMP)', '真实值', 'Fontsize', fsz)
+% xlabel('Range (m)', 'Fontsize', fsz);
+% ylabel('Azimuth ($\circ$)', 'Interpreter','latex', 'Fontsize', fsz);
+% zlabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'True','Fontsize', fsz)
 
 
 % CFAR and FFT results

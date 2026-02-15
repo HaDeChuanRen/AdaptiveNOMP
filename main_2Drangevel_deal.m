@@ -2,16 +2,16 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
-exp_type = '\07multiple';
-exp_serial = '\01';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220904exp'; % 20220506exp
+exp_type = '';%\07multiple 
+exp_serial = '\04';% 01
 
 filename = [orginal_path, exp_type, exp_serial, '\adc_data.bin'];
 data_cube = readadc(filename);
 
-range_true = [4.87, 2.63];
-velocity_true = [0, 0];
-amp_true = [75, 75];
+range_true = []; % 4.87, 2.63
+velocity_true = []; % 0, 0
+amp_true = []; % 75, 75
 
 % radar parameter
 c = 3e8;
@@ -32,7 +32,7 @@ My = 64;
 NM_num = Nx * My;
 
 N_start = 1;
-M_start = 2000;
+M_start = 200;
 L_start = 2;
 ymat = squeeze(data_cube(N_start : (N_start + Nx - 1), ...
 M_start : (M_start + My - 1), L_start));
@@ -45,7 +45,7 @@ training_m = 5;
 guard_training_size2D = [guard_n, guard_m, training_n, training_m];
 
 
-K_max = 32;
+K_max = 48;
 P_oe2D = 1e-2;
 N_r2D = (2 * training_n + 1) * (2 * training_m + 1) - ...
 (2 * guard_n + 1) * (2 * guard_m + 1);
@@ -96,13 +96,13 @@ figure;
 stem3(range_hat, velocity_hat, target_threshold, 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_hat, velocity_hat, target_amp, 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
-xlim([0 5])
-ylim([-3 3])
-xlabel('Range (m)', 'Fontsize', fsz);
-ylabel('Velocity (m/s)', 'Fontsize', fsz)
-zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True (people 1 and 2)', 'Fontsize', fsz)
+% stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+xlim([0 25])
+ylim([-5 5])
+xlabel('径向距离 (m)', 'Fontsize', fsz);
+ylabel('径向速度 (m/s)', 'Fontsize', fsz)
+zlabel('幅值 (dB)', 'Fontsize', fsz)
+legend('自适应门限 (NOMP-CFAR)', '检出点 (NOMP-CFAR)', '真实值', 'Fontsize', fsz)
 % title('range Doppler estimation by Adap-CFAR-NOMP')
 
 
@@ -151,13 +151,17 @@ figure;
 stem3(range_hatfft, velocity_hatfft, 10 * log10(Threshold_fft), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem3(range_hatfft, velocity_hatfft, 20 * log10(gain_fft), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
-xlim([0 5])
-ylim([-3 3])
-xlabel('Range (m)', 'Fontsize', fsz);
-ylabel('Velocity (m/s)', 'Fontsize', fsz)
-zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 1 and 2)','Fontsize', fsz)
+% stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+xlim([0 25])
+ylim([-5 5])
+xlabel('径向距离 (m)', 'Fontsize', fsz);
+ylabel('径向速度 (m/s)', 'Fontsize', fsz)
+zlabel('幅值 (dB)', 'Fontsize', fsz)
+legend('自适应门限 (CFAR)', '检出点 (CFAR)', '真实值 (行人1与行人2)', 'Fontsize', fsz)
+% xlabel('Range (m)', 'Fontsize', fsz);
+% ylabel('Velocity (m/s)', 'Fontsize', fsz)
+% zlabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Threshold (CFAR)', 'Detected (CFAR)', 'True (people 1 and 2)','Fontsize', fsz)
 % title('range Doppler estimation by FFT-CFAR')
 
 
@@ -186,14 +190,18 @@ surf(range_newidx, velocity_newidx, (10 * log10(tau_set)) * ones(My, Nx),...
 'Linestyle', 'none', 'Facealpha', '0.8');
 hold on;
 stem3(range_tau, velocity_tau, 20 * log10(abs(gain_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
-stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
+% stem3(range_true, velocity_true, amp_true, ':.m', 'Linewidth', lw);
 grid on;
-xlim([0 5])
-ylim([-3 3])
-xlabel('Range (m)', 'Fontsize', fsz);
-ylabel('velocity (m/s)', 'Interpreter', 'latex', 'Fontsize', fsz);
-zlabel('Amplitude (dB)', 'Fontsize', fsz)
-legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'True (people 1 and 2)', 'Fontsize', fsz)
+xlim([0 25])
+ylim([-5 5])
+xlabel('径向距离 (m)', 'Fontsize', fsz);
+ylabel('径向速度 (m/s)', 'Fontsize', fsz)
+zlabel('幅值 (dB)', 'Fontsize', fsz)
+legend('门限 (NOMP)', '检出点 (NOMP)', '真实值 (行人1与行人2)', 'Fontsize', fsz)
+% xlabel('Range (m)', 'Fontsize', fsz);
+% ylabel('velocity (m/s)', 'Interpreter', 'latex', 'Fontsize', fsz);
+% zlabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Threshold (NOMP)', 'Amplitude (NOMP)', 'True (people 1 and 2)', 'Fontsize', fsz)
 
 
 

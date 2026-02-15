@@ -2,7 +2,7 @@ clc; clear; close all;
 
 
 % read the ADC data
-orginal_path = 'D:\XuMenghuai\FMCW mmwave range and Doppler estimation 202106\4program\Matlab\data\20220506exp\20220506exp';
+orginal_path = 'C:\study\202206MNOMP_CFAR\data\20220506exp';
 exp_type = '\02people2';
 exp_serial = '\01';
 
@@ -97,14 +97,16 @@ figure;
 plot(range_idx, 20 * log10(y_fftabs_vector), '-k', 'Linewidth', lw);
 hold on;
 plot(range_idx, 10 * log10(Threshold_CUT), '-.r', 'Linewidth', lw)
-
 % plot(range_true(1)*ones(size(amplitude_idx)), amplitude_idx,':r', range_true(2)*ones(size(amplitude_idx)), amplitude_idx,':r', 'Linewidth', lw);
-% stem(range_true(1), amplitude_idx * ones(K_true, 1), ':.r', 'Linewidth', lw,'DisplayName','True', 'Fontsize', fsz)
+% stem(range_true, amplitude_idx * ones(K_true, 1), ':.r', 'Linewidth', lw,'DisplayName','True', 'Fontsize', fsz)
 plot(range_hatfft, 20 * log10(y_fftabs_vector(peak_grid)) , 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem(range_true, amplitude_idx * ones(K_true, 1) , ':.m', 'Linewidth', lw)
-legend('Spectrum', 'Threshold (CFAR)', 'Detected (CFAR)', 'True', 'Fontsize', fsz)
-xlabel('Range (m)', 'Fontsize', fsz)
-ylabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Spectrum', 'Threshold (CFAR)', 'Detected (CFAR)', 'True', 'Fontsize', fsz)
+% xlabel('Range (m)', 'Fontsize', fsz)
+% ylabel('Amplitude (dB)', 'Fontsize', fsz)
+legend('FFT谱', '阈值 (CFAR)', '检测点 (CFAR)', '真实值', 'Fontsize', fsz)
+xlabel('距离 (m)', 'Fontsize', fsz)
+ylabel('幅值 (dB)', 'Fontsize', fsz)
 % title('FFT result of IF')
 xlim([0, range_max / 5])
 % (c * 2 * pi) / (4 * pi * Ts * Slope_fre)
@@ -112,7 +114,7 @@ xlim([0, range_max / 5])
 
 
 omegax_tau = omegalist_tau;
-range_tau = (c * omegax_tau) / (4 * pi * Ts * Slope_fre)
+range_tau = (c * omegax_tau) / (4 * pi * Ts * Slope_fre);
 Khat_tau = length(omegax_tau);
 
 figure;
@@ -120,28 +122,32 @@ plot(range_idx, 10 * log10(tau_set) * ones(Nx, 1), 'r', 'Linewidth', lw, 'Marker
 hold on;
 stem(range_tau, 20 * log10(abs(gainlist_tau)), 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
-legend('Threshold (NOMP)', 'Detected (NOMP)', 'True', 'Fontsize', fsz)
+% legend('Threshold (NOMP)', 'Detected (NOMP)', 'True', 'Fontsize', fsz)
+legend('阈值 (NOMP)', '检测点 (NOMP)', '真实值', 'Fontsize', fsz)
 xlim([0, range_max / 5])
-xlabel('Range (m)', 'Fontsize', fsz)
-ylabel('Amplitude (dB)', 'Fontsize', fsz)
-
+% xlabel('Range (m)', 'Fontsize', fsz)
+% ylabel('Amplitude (dB)', 'Fontsize', fsz)
+xlabel('距离 (m)', 'Fontsize', fsz)
+ylabel('幅值 (dB)', 'Fontsize', fsz)
 
 
 
 omegax_hat = omega_list;
-range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre)
+range_hat = (c * omegax_hat) / (4 * pi * Ts * Slope_fre);
 % subplot(2, 1, 2)
 figure;
 plot(range_hat, 10 * log10(abs(Threshold_collect)), 'rx', 'Linewidth', lw, 'Markersize', msz);
 hold on;
 stem(range_hat, 20 * log10(abs(gain_list)), 'bo', 'Linewidth', lw, 'Markersize', msz);
 stem(range_true, amplitude_idx * ones(K_true, 1), ':.m', 'Linewidth', lw)
-legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True', 'Fontsize', fsz)
-xlabel('Range (m)', 'Fontsize', fsz)
-ylabel('Amplitude (dB)', 'Fontsize', fsz)
+% legend('Threshold (NOMP-CFAR)', 'Detected (NOMP-CFAR)', 'True', 'Fontsize', fsz)
+legend('阈值 (NOMP-CFAR)', '检测点 (NOMP-CFAR)', '真实值', 'Fontsize', fsz)
+% xlabel('Range (m)', 'Fontsize', fsz)
+% ylabel('Amplitude (dB)', 'Fontsize', fsz)
 % title('NOMP-CFAR result of IF')
 xlim([0, range_max / 5])
-
+xlabel('距离 (m)', 'Fontsize', fsz)
+ylabel('幅值 (dB)', 'Fontsize', fsz)
 
 
 

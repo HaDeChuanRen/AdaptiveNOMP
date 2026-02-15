@@ -135,6 +135,6 @@ legend('$\bar{\rm P}_{\rm FA} = 0.01 / N$', 'VALSE', 'NOMP', ...
     'NOMP-CFAR', 'Interpreter', 'latex', 'Fontsize', fsz)
 xlabel('Strength of Noise fluctuation u (dB)', 'Interpreter', 'latex', 'Fontsize', fsz)
 ylabel('Measured $\bar{\rm P}_{\rm FA}$', 'Interpreter', 'latex', 'Fontsize', fsz)
-ylim([0, 4e-4])
+ylim([0, 1e-3])
 
 

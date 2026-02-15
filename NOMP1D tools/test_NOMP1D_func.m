@@ -29,7 +29,7 @@ N_max = ceil(tau_max * Fs);
 K_targets = 4;
 sigma_n = 1;
 % SNR_all = 5 * rand(1, K_targets) + 1;
-SNR_dB = 36;
+SNR_dB = 15;
 % gain_alltargets = randn(K_targets, 1) + 1j * randn(K_targets, 1);
 gain_allK = sqrt(10 .^ (SNR_dB / 10) * sqrt(sigma_n)) .* exp(1j * 2 * pi * rand(K_targets, 1));
 % gain_allK = zeros(1, K_targets);
@@ -56,7 +56,10 @@ for k_idx = 1 : K_targets
     y_vec = gain_allK(k_idx) * y_veck + y_vec;
 end
 
-y_vec = y_vec + sqrt(1 / 2) *(randn(Nx, 1) + 1j * randn(Nx, 1));
+y_vec = y_vec + sqrt(1 / 2) * (randn(Nx, 1) + 1j * randn(Nx, 1));
+
+yf_abs = (abs(fft(y_vec)) .^ 2) / Nx;
+figure; plot(yf_abs)
 
 % gamma_mnomp = [4, 4];
 K_known = K_targets;

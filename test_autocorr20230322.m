@@ -1,19 +1,22 @@
 clc; clear; close all;
+rng(1);
+addpath('analysis tools\')
+addpath('NOMP1D tools\')
 
-MC = 100;
+MC = 300;
 % Define Scenario
 Nx = 256; % Length of Sinusoid
-K = 16;
+K = 1;
 sigma_n = 1;              % noise variance sigma^2, instead of sigma
 S_snap = 1;
-SNRvec_all = 12 : 1 : 20;
-length_SNR = length(SNRvec_all);
+SNR = 20;
+% length_SNR = length(SNRvec_all);
 
 M = Nx;
 Smat_com = eye(M);
 
 % algorithm parameters
-K_max = 32;
+K_max = 1;
 P_oe = 0.01;
 CFAR_method = 'CA';
 gamma_oversamping = 4;
@@ -23,73 +26,87 @@ R_s = 1;
 
 tau_set = sigma_n * chi2inv((1 - P_oe) ^ (1 / Nx), 2 * S_snap) / 2;
 alpha_set = alpha_PoebyS(P_oe, Nx, N_r, S_snap);
+sampledManifold = preProcessMeasMat(Smat_com, gamma_oversamping);
 
-cmat_corr = zeros(MC, N_r);
+cmat_corr0 = zeros(MC, N_r);
+cmat_corr1 = zeros(MC, N_r);
 
 tic;
 for mc_idx = 1 : MC
     hwaibar = waitbar(mc_idx / MC);
-    [y, omega_true, gain_true] = create_yvector(K, S_snap, SNRvec_all(end), ...
-        sigma_n, Smat_com);
 
-    [omegavec_CA, gainvec_CA, y_r] = ...
-        MNOMP_CFAR_alpha(y, Smat_com, alpha_set, N_r, K_max);
+    y_noise = sqrt(sigma_n / 2) * (randn(Nx, S_snap) + 1j*randn(Nx, S_snap));
+    [omegavec_0, gainvec_0, y_r0] = MNOMP_K(y_noise, 0, Smat_com);
+    % [omegavec_0, gainvec_0, y_r0] = ...
+    %     MNOMP_CFAR_alpha(y_noise, Smat_com, alpha_set, N_r, K_max);
+    cmat_corr0(mc_idx, :) = traincell_set(y_r0, sampledManifold, N_r, ...
+        omegavec_0);
 
-    sampledManifold = preProcessMeasMat(Smat_com, gamma_oversamping);
+    omega_true = pi * (2 * rand() - 1);
+    gain_true = bsxfun(@times, sqrt(sigma_n) * (10 .^ (SNR / 20)), ...
+        exp(1j * 2 * pi * rand(K, S_snap)));
+    y_full = exp(1j * (0 : (Nx - 1)).' * omega_true.') / sqrt(Nx) * gain_true;
+    y1 = y_full + y_noise;
+    [omegavec_1, gainvec_1, y_r1] = MNOMP_K(y1, 1, Smat_com);
+    cmat_corr1(mc_idx, :) = traincell_set(y_r1, sampledManifold, N_r, ...
+        omegavec_1);
+
+    % if K > length(gainvec_CA)
+    %     mc_idx = mc_idx - 1;
+    %     continue;
+    % end
 
     % Question: which y_r are used for the following steps?
     % initialize the parameters
-    R = length(sampledManifold.coarseOmega);
-    N = sampledManifold.length;
-    OSR = round(R/N);
-    % training_n = train_guard_cell(2);
-    guard_cells = 4;
+    % R = length(sampledManifold.coarseOmega);
+    % N = sampledManifold.length;
+    % OSR = round(R/N);
+    % guard_cells = 4;
 
 
-    % create the prob vector
-    if sampledManifold.is_eye
-        gains  = fft(y, R)/sqrt(N);   % R * T matrix
-        if sampledManifold.ant_idx(1)~=0
-            gains = bsxfun(@times, gains, exp(-1j * ...
-                sampledManifold.coarseOmega(:) * sampledManifold.ant_idx(1)));
-        end
-        prob = sum(abs(gains).^2,2);
-    else
-        energy = sampledManifold.map_IfftMat_norm_sq.';   % R*1
-        gains = bsxfun(@rdivide,sampledManifold.map_IfftMat'*y,energy); % R*T
-        prob = sum(bsxfun(@times,abs(gains).^2, energy),2);
-    end
+    % % create the prob vector
+    % if sampledManifold.is_eye
+    %     gains  = fft(y, R)/sqrt(N);   % R * T matrix
+    %     if sampledManifold.ant_idx(1)~=0
+    %         gains = bsxfun(@times, gains, exp(-1j * ...
+    %             sampledManifold.coarseOmega(:) * sampledManifold.ant_idx(1)));
+    %     end
+    %     prob = sum(abs(gains).^2,2);
+    % else
+    %     energy = sampledManifold.map_IfftMat_norm_sq.';   % R*1
+    %     gains = bsxfun(@rdivide,sampledManifold.map_IfftMat'*y,energy); % R*T
+    %     prob = sum(bsxfun(@times,abs(gains).^2, energy),2);
+    % end
 
 
-    Allidx_set = 1 : N;
-    Target_idx = round(omegavec_CA * N / (2 * pi) + 1);
+    % Allidx_set = 1 : N;
+    % Target_idx = round(omegavec_CA * N / (2 * pi) + 1);
 
-    prob_ind = prob(1 : OSR : end);
-    [res_inf_normSq_rot, peak_idx] = max(prob_ind);
-    guardidx_set = (peak_idx - guard_cells) : (peak_idx + guard_cells);
+    % prob_ind = prob(1 : OSR : end);
+    % [res_inf_normSq_rot, peak_idx] = max(prob_ind);
+    % guardidx_set = (peak_idx - guard_cells) : (peak_idx + guard_cells);
 
-    tempidx_set = setdiff(Allidx_set, Target_idx);
-    noiseidx_set = setdiff(tempidx_set, guardidx_set);
+    % tempidx_set = setdiff(Allidx_set, Target_idx);
+    % noiseidx_set = setdiff(tempidx_set, guardidx_set);
 
-    [~, peakidx_new] = min(abs(noiseidx_set - peak_idx));
-    remaining_len = length(noiseidx_set);
-    noiseidx_ext = repmat(noiseidx_set, [1, 3]);
-    tempidx = round(N_r / 2);
-    % trainingidx_set = peakidx_new - round
+    % [~, peakidx_new] = min(abs(noiseidx_set - peak_idx));
+    % remaining_len = length(noiseidx_set);
+    % noiseidx_ext = repmat(noiseidx_set, [1, 3]);
+    % tempidx = round(N_r / 2);
 
-    noiseidx_sel = noiseidx_ext(remaining_len + peakidx_new - tempidx + (1 : N_r));
-    gain_ind = gains(1 : OSR : end);
-    noise_n = gain_ind(noiseidx_sel);
+    % noiseidx_sel = noiseidx_ext(remaining_len + peakidx_new - tempidx + (1 : N_r));
+    % gain_ind = gains(1 : OSR : end);
+    % noise_n = gain_ind(noiseidx_sel);
 
-    [cvec_corr, lags_corr] = xcorr(noise_n);
-    zero_idx = find(lags_corr == 0);
-    cmat_corr(mc_idx, :) = cvec_corr(zero_idx : end) / N_r;
-    % plot(10 * log10(abs(cvec_corr) / N_r))
+    % [cvec_corr, lags_corr] = xcorr(noise_n);
+    % zero_idx = find(lags_corr == 0);
+    % cmat_corr(mc_idx, :) = cvec_corr(zero_idx : end) ./ (N_r : -1 : 1)';
 end
 toc;
 delete(hwaibar)
 
-cvec_mean = abs(mean(cmat_corr)); % Question: abs before mean?
+cvec_mean0 = abs(mean(cmat_corr0));
+cvec_mean1 = abs(mean(cmat_corr1));
 
 % plot the figure
 lw = 2;
@@ -98,9 +115,18 @@ msz = 8;
 lag_vec = 0 : N_r - 1;
 
 figure;
-plot(lag_vec, 10 * log10(cvec_mean), '-bo', 'LineWidth', lw, 'Markersize', msz);
-xlabel('lag');
-ylabel('auto-correlation (dB)');
+hold on;
+plot(lag_vec, 10 * log10(cvec_mean0), '-bo', 'LineWidth', lw, 'Markersize', ...
+    msz);
+plot(lag_vec, 10 * log10(cvec_mean1), '-r+', 'LineWidth', lw, 'Markersize', ...
+    msz);
+xlim([0 30])
+legend('仅有噪声', '单目标剔除', 'Fontsize', fsz);
+xlabel('自相关滞后', 'Fontsize', fsz);
+ylabel('自相关结果 (dB)', 'Fontsize', fsz);
+% legend('noise only', 'one target', 'Fontsize', fsz);
+% xlabel('lag', 'Fontsize', fsz);
+% ylabel('auto-correlation (dB)', 'Fontsize', fsz);
 
 % N_r = 100;
 % noise_n = sqrt(sigma_n / 2) * (randn(N_r, S_snap) + 1j*randn(N_r, S_snap));
